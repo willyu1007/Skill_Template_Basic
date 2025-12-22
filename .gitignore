@@ -1,0 +1,23 @@
+# Generated provider artifacts
+.claude/
+.codex/
+.cursor/
+.copilot/
+.gemini/
+
+# Generated entry files
+CLAUDE.md
+.cursorrules
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+

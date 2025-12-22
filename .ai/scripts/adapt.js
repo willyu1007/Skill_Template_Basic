@@ -163,25 +163,47 @@ function adapt(provider) {
     }
   }
 
-  // 4. Provider-specific adaptations
+  // 4. Generate provider-specific entry file
+  console.log('');
+  console.log(colors.green(`Generating entry file...`));
+  
+  const entryFiles = {
+    claude: 'CLAUDE.md',
+    codex: 'AGENTS.md',
+    cursor: '.cursorrules',
+    copilot: 'AGENTS.md',
+    gemini: 'AGENTS.md',
+  };
+  
+  const entryFile = entryFiles[provider];
+  if (entryFile && fs.existsSync('AGENTS.md')) {
+    if (entryFile === 'AGENTS.md') {
+      console.log(colors.gray(`  Using existing AGENTS.md`));
+    } else {
+      fs.copyFileSync('AGENTS.md', entryFile);
+      console.log(colors.gray(`  [+] ${entryFile} (from AGENTS.md)`));
+    }
+  }
+
+  // 5. Provider-specific adaptations
   console.log('');
   console.log(colors.green(`Applying ${provider}-specific adaptations...`));
   
   switch (provider) {
     case 'claude':
-      console.log(colors.gray('  Claude Code format applied (agents/ for workflows)'));
+      console.log(colors.gray('  Claude Code format (agents/ for workflows)'));
       break;
     case 'cursor':
-      console.log(colors.gray('  Cursor format applied'));
+      console.log(colors.gray('  Cursor format (.cursorrules entry)'));
       break;
     case 'copilot':
-      console.log(colors.gray('  Copilot format applied'));
+      console.log(colors.gray('  Copilot format'));
       break;
     case 'codex':
-      console.log(colors.gray('  Codex format applied'));
+      console.log(colors.gray('  Codex format (skills only)'));
       break;
     case 'gemini':
-      console.log(colors.gray('  Gemini format applied'));
+      console.log(colors.gray('  Gemini format'));
       break;
   }
 

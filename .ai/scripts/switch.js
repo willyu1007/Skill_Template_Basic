@@ -17,3 +17,4 @@ const adaptScript = path.join(__dirname, 'adapt.js');
 execSync(`node "${adaptScript}" ${provider}`, { stdio: 'inherit' });
 
 
+

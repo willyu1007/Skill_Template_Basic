@@ -1,47 +1,64 @@
-# AI Agents & Workflows
+# AI Assistant Instructions
 
-This document provides an overview of the available AI workflows (agents) in this repository. All workflow definitions are maintained in the **Single Source of Truth (SSOT)** at `.ai/ssot/workflows/`.
+This is an **AI-Friendly Repository Template** - a starter kit for creating LLM-optimized codebases.
+
+## First Time?
+
+**Read `init/AGENTS.md` for initialization instructions.**
+
+## Project Type
+
+Template repository. Users clone this to start new AI-friendly projects.
+
+## Key Directories
+
+| Directory | Purpose |
+|-----------|---------|
+| `init/` | **Start here** - Initialization instructions and output |
+| `.ai/ssot/` | Single Source of Truth - edit skills/workflows here |
+| `.ai/scripts/` | Adapter scripts (Node.js) |
+| `.ai/templates/` | Templates and examples |
+| `.[provider]/` | Generated artifacts for chosen provider |
+| `dev/` | Working documentation for complex tasks |
+
+## Common Tasks
+
+### Add New Skill
+
+1. Create `.ai/ssot/skills/[skill-name]/SKILL.md`
+2. Add `resources/` subdirectory if needed
+3. Run `node .ai/scripts/adapt.js [provider]`
+
+### Add New Workflow
+
+1. Create `.ai/ssot/workflows/[workflow-name].md`
+2. Include YAML frontmatter with `name` and `description`
+3. Run `node .ai/scripts/adapt.js [provider]`
+
+### Switch Provider
+
+```bash
+node .ai/scripts/switch.js [new-provider]
+```
 
 ## Available Workflows
 
-### Development & Debugging
-| Workflow | Description | Path |
-|----------|-------------|------|
-| `auth-route-debugging` | Diagnose 401/403 errors and JWT issues | `.ai/ssot/workflows/auth-route-debugging.md` |
-| `auth-route-testing` | End-to-end API route verification | `.ai/ssot/workflows/auth-route-testing.md` |
-| `frontend-error-resolution` | Debug React components and styling | `.ai/ssot/workflows/frontend-error-resolution.md` |
-| `typescript-error-resolution` | Fix `tsc` compilation errors | `.ai/ssot/workflows/typescript-error-resolution.md` |
+| Workflow | Description |
+|----------|-------------|
+| `auth-route-debugging` | Diagnose 401/403 errors and JWT issues |
+| `auth-route-testing` | End-to-end API route verification |
+| `frontend-error-resolution` | Debug React components and styling |
+| `typescript-error-resolution` | Fix `tsc` compilation errors |
+| `code-architecture-review` | Review code for pattern consistency |
+| `code-refactoring` | Safely reorganize code |
+| `documentation-maintenance` | Keep documentation accurate |
+| `technical-research` | Deep-dive into complex problems |
 
-### Architecture & Quality
-| Workflow | Description | Path |
-|----------|-------------|------|
-| `code-architecture-review` | Review code for pattern consistency | `.ai/ssot/workflows/code-architecture-review.md` |
-| `code-refactoring` | Safely reorganize code with zero breakage | `.ai/ssot/workflows/code-refactoring.md` |
-| `implementation-plan-review` | Analyze plans for technical soundness | `.ai/ssot/workflows/implementation-plan-review.md` |
+Workflow files: `.ai/ssot/workflows/`
 
-### Maintenance & Research
-| Workflow | Description | Path |
-|----------|-------------|------|
-| `documentation-maintenance` | Keep SSOT and guides accurate | `.ai/ssot/workflows/documentation-maintenance.md` |
-| `technical-research` | Deep-dive into complex problems | `.ai/ssot/workflows/technical-research.md` |
+## Rules
 
-## Usage Guidelines
-
-### How to Invoke
-Request the AI assistant to "use the `[workflow-name]` workflow" or "follow the `[workflow-name]` agent guide".
-
-### Rules
-- AI assistants **MUST** follow the steps defined in the workflow files exactly.
-- AI assistants **SHOULD** provide a structured report upon completion.
-- If a workflow requires database access, the AI **MUST** verify persistence for write operations.
-
-## Creating New Workflows
-1. Create a new markdown file in `.ai/ssot/workflows/` following kebab-case naming.
-2. Include `name` and `description` in the YAML frontmatter.
-3. Define `Purpose`, `Steps`, and `Output Format` sections.
-4. Run `./.ai/scripts/switch.ps1` to update provider routing indices.
-
-## Reference
-- **Source**: `.ai/ssot/workflows/`
-- **Documentation Guidelines**: `docs/documentation-guidelines.md`
-- **Naming Conventions**: `docs/naming-conventions.md`
+- Always edit `.ai/ssot/` (SSOT), never edit `.[provider]/` directly
+- Keep SKILL.md files under 500 lines
+- Use `resources/` for detailed reference content
+- Follow progressive disclosure pattern

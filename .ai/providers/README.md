@@ -42,3 +42,4 @@ The adapter performs:
 Always edit in `.ai/ssot/`. The adapter generates read-only provider artifacts.
 
 
+
