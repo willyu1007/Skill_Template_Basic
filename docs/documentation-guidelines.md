@@ -9,7 +9,7 @@ These guidelines target repository documentation that is **maintained for both L
 Applies to (non-exhaustive):
 - Entry & rules: `README.md`, `AGENTS.md`, `CLAUDE.md`
 - Standards & design: specs, ADRs, design notes under `docs/`
-- SSOT content: `.ai/ssot/skills/`, `.ai/ssot/workflows/`, `.ai/ssot/commands/`
+- SSOT content: `.ai/skills/`, `.ai/commands/`
 - Bootstrap materials: docs and artifacts under `construction/` (or `init/`)
 
 ## 2. Core principles (write for LLMs)
@@ -17,12 +17,12 @@ Applies to (non-exhaustive):
 - **Conclusion first**: start each section with decisions/constraints, then explain rationale/details.
 - **One paragraph, one intent**: do not mix multiple topics in the same paragraph.
 - **Verifiable**: key claims must include "how to verify" (commands, paths, checkpoints).
-- **Progressive disclosure**: keep the top doc to "overview + navigation"; move deep detail to sub-docs (`resources/`, `appendix/`).
+- **Progressive disclosure**: keep the top doc to "overview + navigation"; move deep detail to supporting files (`reference.md`, `examples.md`, `scripts/`, `templates/`, `appendix/`).
 
 ### 2.2 Semantic precision
 - Use **MUST/SHOULD/MAY** to express requirement strength.
 - Avoid vague references ("it/this/above/related"); use explicit nouns and paths instead.
-- Define terms on first use (e.g., SSOT, provider, adapter).
+- Define terms on first use (e.g., SSOT, skill stub).
 - Make assumptions explicit (OS differences, relative vs absolute paths, workspace roots).
 
 ### 2.3 Token efficiency
@@ -51,8 +51,8 @@ Applies to (non-exhaustive):
 6. Verification (commands/checkpoints)
 7. Risks & rollback (if generating/overwriting)
 
-### 3.3 Skill / Workflow / Command docs (SSOT)
-For `.ai/ssot/...` content, use:
+### 3.3 Skill / Command docs (SSOT)
+For `.ai/skills/` and `.ai/commands/` content, use:
 - **Purpose (1–2 sentences)**: what problem it solves
 - **Trigger / usage**: when to use; required inputs; expected outputs
 - **Steps**: bullet list; minimal examples only
@@ -61,7 +61,7 @@ For `.ai/ssot/...` content, use:
 
 ## 4. Readability and maintainability rules (MUST)
 - Keep heading depth ≤ 4 levels (`#` to `####`).
-- Wrap all paths/commands/identifiers in backticks (e.g., `.ai/ssot/skills/`, `scripts/switch-provider`).
+- Wrap all paths/commands/identifiers in backticks (e.g., `.ai/skills/`, `.ai/scripts/sync-skills.js`).
 - Any action that generates/overwrites files MUST specify:
   - blast radius (which directories/files are written)
   - idempotency (whether repeated runs are safe)
@@ -69,7 +69,7 @@ For `.ai/ssot/...` content, use:
 
 ## 5. Prompt-oriented writing (recommended)
 When a doc is meant to guide an LLM, write the "inputs/outputs/invariants" like an interface:
-- **Inputs**: required fields (e.g., provider, project profile, target directory)
+- **Inputs**: required fields (e.g., project profile, target directory)
 - **Outputs**: which files/directories are generated
 - **Invariants**: rules that must not be violated (e.g., SSOT must not fork; artifact naming is fixed)
 

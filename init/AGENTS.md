@@ -8,16 +8,7 @@ Guide user through project initialization by collecting information and generati
 
 ## Initialization Steps
 
-### Step 1: Ask Provider
-
-Ask which LLM provider they use:
-- `claude` - Claude Code
-- `codex` - OpenAI Codex
-- `cursor` - Cursor
-- `copilot` - GitHub Copilot
-- `gemini` - Google Gemini
-
-### Step 2: Collect Project Information
+### Step 1: Collect Project Information
 
 **See `init/INITIALIZATION.md` for complete field reference.**
 
@@ -31,7 +22,7 @@ Quick checklist:
 | Backend | framework, language, database |
 | Structure | repoStructure, testStrategy |
 
-### Step 3: Generate Files
+### Step 2: Generate Files
 
 Create both files in `init/`:
 
@@ -40,7 +31,6 @@ Create both files in `init/`:
 name: project-name
 description: Project description
 version: 0.1.0
-provider: [chosen-provider]
 
 requirements:
   goals: [collected goals]
@@ -65,27 +55,28 @@ generated: [ISO timestamp]
 
 **init/project-profile.json:** Same content in JSON format.
 
-### Step 4: Run Adapter
+### Step 3: Sync Skill Stubs
 
 Execute:
 ```bash
-node .ai/scripts/adapt.js [provider]
+node .ai/scripts/sync-skills.js
 ```
 
-### Step 5: Guide Customization
+### Step 4: Guide Customization
 
-After adapter runs, guide user to:
-1. Review generated `.[provider]/` directory
-2. Customize `.ai/ssot/skills/` for their project
+After sync runs, guide user to:
+1. Review generated `.codex/skills/` and `.claude/skills/` stubs
+2. Customize `.ai/skills/` for their project
 3. Remove unneeded example skills
-4. Add project-specific workflows
+4. Add project-specific workflow skills
+5. Add or refine `.ai/commands/` as needed
 
 ## Rules
 
 - All fields are optional; use sensible defaults
 - Keep conversation focused on essential information
 - Generate both YAML and JSON profiles
-- Always run adapter after generating profile
+- Always run `node .ai/scripts/sync-skills.js` after generating profile
 
 ## After Initialization
 

@@ -15,31 +15,32 @@ Template repository. Users clone this to start new AI-friendly projects.
 | Directory | Purpose |
 |-----------|---------|
 | `init/` | **Start here** - Initialization instructions and output |
-| `.ai/ssot/` | Single Source of Truth - edit skills/workflows here |
-| `.ai/scripts/` | Adapter scripts (Node.js) |
+| `.ai/skills/` | Single Source of Truth for skills (including workflows) |
+| `.ai/commands/` | Single Source of Truth for commands |
+| `.ai/scripts/` | Sync scripts (Node.js) |
 | `.ai/templates/` | Templates and examples |
-| `.[provider]/` | Generated artifacts for chosen provider |
+| `.codex/` | Codex skill entry stubs |
+| `.claude/` | Claude skill entry stubs |
 | `dev/` | Working documentation for complex tasks |
 
 ## Common Tasks
 
 ### Add New Skill
 
-1. Create `.ai/ssot/skills/[skill-name]/SKILL.md`
-2. Add `resources/` subdirectory if needed
-3. Run `node .ai/scripts/adapt.js [provider]`
+1. Create `.ai/skills/[skill-name]/SKILL.md`
+2. Add supporting files alongside `SKILL.md` (for example `reference.md`, `examples.md`, `scripts/`, `templates/`)
+3. Run `node .ai/scripts/sync-skills.js`
 
-### Add New Workflow
+### Add New Workflow (as a skill)
 
-1. Create `.ai/ssot/workflows/[workflow-name].md`
+1. Create `.ai/skills/[workflow-name]/SKILL.md`
 2. Include YAML frontmatter with `name` and `description`
-3. Run `node .ai/scripts/adapt.js [provider]`
+3. Run `node .ai/scripts/sync-skills.js`
 
-### Switch Provider
+### Add New Command
 
-```bash
-node .ai/scripts/switch.js [new-provider]
-```
+1. Create `.ai/commands/[command-name]/COMMAND.md`
+2. Include YAML frontmatter with `name`, `description`, and `arguments` if needed
 
 ## Available Workflows
 
@@ -54,11 +55,12 @@ node .ai/scripts/switch.js [new-provider]
 | `documentation-maintenance` | Keep documentation accurate |
 | `technical-research` | Deep-dive into complex problems |
 
-Workflow files: `.ai/ssot/workflows/`
+Workflow skills live under `.ai/skills/`
 
 ## Rules
 
-- Always edit `.ai/ssot/` (SSOT), never edit `.[provider]/` directly
+- Always edit `.ai/skills/` and `.ai/commands/` (SSOT), never edit `.codex/` or `.claude/` directly
 - Keep SKILL.md files under 500 lines
-- Use `resources/` for detailed reference content
+- Use supporting files (`reference.md`, `examples.md`, `scripts/`, `templates/`) for detailed reference content
+- Do not create a `resources/` subdirectory inside skills
 - Follow progressive disclosure pattern

@@ -9,7 +9,6 @@ Complete field reference for project initialization.
 | `name` | string | Yes | Project name (kebab-case) | `my-saas-app` |
 | `description` | string | Yes | One-line description | `A SaaS platform for...` |
 | `version` | string | No | Initial version | `0.1.0` |
-| `provider` | enum | Yes | LLM provider | `codex` |
 
 ## Requirements
 
@@ -61,7 +60,6 @@ Complete field reference for project initialization.
 name: my-project
 description: Project description here
 version: 0.1.0
-provider: codex
 
 requirements:
   goals: |
@@ -95,7 +93,6 @@ generated: 2025-01-15T10:30:00Z
   "name": "my-project",
   "description": "Project description here",
   "version": "0.1.0",
-  "provider": "codex",
   "requirements": {
     "goals": ["Build a scalable API", "Support 1000 concurrent users"],
     "domain": "E-commerce platform with products, orders, users",
@@ -124,12 +121,11 @@ generated: 2025-01-15T10:30:00Z
 
 Suggested order for collecting information:
 
-1. **Provider** - Which AI assistant?
-2. **Name & Description** - What is this project?
-3. **Goals** - What should it achieve?
-4. **Domain** - What business problem does it solve?
-5. **Tech Stack** - Frontend and backend choices
-6. **Constraints** - Any special requirements?
+1. **Name & Description** - What is this project?
+2. **Goals** - What should it achieve?
+3. **Domain** - What business problem does it solve?
+4. **Tech Stack** - Frontend and backend choices
+5. **Constraints** - Any special requirements?
 
 Keep it conversational; don't ask all questions at once.
 
