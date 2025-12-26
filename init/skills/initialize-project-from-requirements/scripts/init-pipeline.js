@@ -9,11 +9,14 @@
  *   Stage C: minimal scaffold + skill pack manifest update + wrapper sync
  *
  * Commands:
+ *   - start          Initialize state file and show next steps
+ *   - status         Show current initialization progress
+ *   - advance        Check current stage completion and prompt for next stage
  *   - validate       Validate a blueprint JSON (no writes)
  *   - check-docs     Validate Stage A docs (structure + template placeholders)
  *   - suggest-packs  Recommend skill packs from blueprint capabilities (warn-only by default)
  *   - scaffold       Plan or apply a minimal directory scaffold from the blueprint
- *   - apply          validate + (optional) check-docs + scaffold + manifest update + wrapper sync
+ *   - apply          validate + (optional) check-docs + scaffold + configs + manifest update + wrapper sync
  *   - cleanup-init   Remove the `init/` bootstrap kit (opt-in, guarded)
  *
  * This script is intentionally framework-agnostic. It avoids generating code.
@@ -29,6 +32,19 @@ Usage:
   node init/skills/initialize-project-from-requirements/scripts/init-pipeline.js <command> [options]
 
 Commands:
+  start
+    --repo-root <path>          Repo root (default: cwd)
+    Initialize state file and show next steps.
+
+  status
+    --repo-root <path>          Repo root (default: cwd)
+    --format <text|json>        Output format (default: text)
+    Show current initialization progress.
+
+  advance
+    --repo-root <path>          Repo root (default: cwd)
+    Check current stage completion and prompt for next stage.
+
   validate
     --blueprint <path>          Blueprint JSON path (required)
     --repo-root <path>          Repo root (default: cwd)
@@ -57,6 +73,7 @@ Commands:
     --providers <both|codex|claude|codex,claude>
                                 Providers to sync (default: both)
     --require-stage-a           Run 'check-docs --strict' and fail if it does not pass
+    --skip-configs              Skip generating config files (package.json, etc.)
     --cleanup-init              Remove <repo-root>/init after success (requires --i-understand)
     --i-understand              Required acknowledgement for destructive actions
 
@@ -66,10 +83,11 @@ Commands:
     --i-understand              Required acknowledgement (refuses without it)
 
 Examples:
+  node .../init-pipeline.js start
+  node .../init-pipeline.js status
   node .../init-pipeline.js check-docs --docs-root docs/project
   node .../init-pipeline.js validate --blueprint docs/project/project-blueprint.json
-  node .../init-pipeline.js scaffold --blueprint docs/project/project-blueprint.json
-  node .../init-pipeline.js apply --blueprint docs/project/project-blueprint.json --providers codex,claude --require-stage-a
+  node .../init-pipeline.js apply --blueprint docs/project/project-blueprint.json --providers codex,claude
 `;
   console.log(msg.trim());
   process.exit(exitCode);
@@ -129,6 +147,299 @@ function writeJson(filePath, data) {
 
 function uniq(arr) {
   return Array.from(new Set(arr));
+}
+
+// ============================================================================
+// State Management
+// ============================================================================
+
+const SCRIPT_DIR = __dirname;
+const TEMPLATES_DIR = path.join(SCRIPT_DIR, '..', 'templates');
+
+function getStatePath(repoRoot) {
+  return path.join(repoRoot, 'init', '.init-state.json');
+}
+
+function createInitialState() {
+  return {
+    version: 1,
+    stage: 'A',
+    createdAt: new Date().toISOString(),
+    stageA: {
+      mustAsk: {
+        onePurpose: { asked: false, answered: false, writtenTo: null },
+        userRoles: { asked: false, answered: false, writtenTo: null },
+        mustRequirements: { asked: false, answered: false, writtenTo: null },
+        outOfScope: { asked: false, answered: false, writtenTo: null },
+        userJourneys: { asked: false, answered: false, writtenTo: null },
+        constraints: { asked: false, answered: false, writtenTo: null },
+        successMetrics: { asked: false, answered: false, writtenTo: null }
+      },
+      docsWritten: {
+        requirements: false,
+        nfr: false,
+        glossary: false,
+        riskQuestions: false
+      },
+      validated: false,
+      userApproved: false
+    },
+    stageB: {
+      drafted: false,
+      validated: false,
+      packsReviewed: false,
+      userApproved: false
+    },
+    stageC: {
+      scaffoldApplied: false,
+      configsGenerated: false,
+      manifestUpdated: false,
+      wrappersSynced: false,
+      userApproved: false
+    },
+    history: []
+  };
+}
+
+function loadState(repoRoot) {
+  const statePath = getStatePath(repoRoot);
+  if (!fs.existsSync(statePath)) {
+    return null;
+  }
+  try {
+    return JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  } catch (e) {
+    console.error(`[warn] Failed to parse state file: ${e.message}`);
+    return null;
+  }
+}
+
+function saveState(repoRoot, state) {
+  const statePath = getStatePath(repoRoot);
+  fs.mkdirSync(path.dirname(statePath), { recursive: true });
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2) + '\n', 'utf8');
+}
+
+function addHistoryEvent(state, event, details) {
+  state.history = state.history || [];
+  state.history.push({
+    timestamp: new Date().toISOString(),
+    event,
+    details
+  });
+}
+
+function getStageProgress(state) {
+  const stageA = state.stageA || {};
+  const stageB = state.stageB || {};
+  const stageC = state.stageC || {};
+
+  const mustAskKeys = Object.keys(stageA.mustAsk || {});
+  const mustAskAnswered = mustAskKeys.filter(k => stageA.mustAsk[k]?.answered).length;
+
+  const docsKeys = ['requirements', 'nfr', 'glossary', 'riskQuestions'];
+  const docsWritten = docsKeys.filter(k => stageA.docsWritten?.[k]).length;
+
+  return {
+    stage: state.stage,
+    stageA: {
+      mustAskTotal: mustAskKeys.length,
+      mustAskAnswered,
+      docsTotal: docsKeys.length,
+      docsWritten,
+      validated: !!stageA.validated,
+      userApproved: !!stageA.userApproved
+    },
+    stageB: {
+      drafted: !!stageB.drafted,
+      validated: !!stageB.validated,
+      packsReviewed: !!stageB.packsReviewed,
+      userApproved: !!stageB.userApproved
+    },
+    stageC: {
+      scaffoldApplied: !!stageC.scaffoldApplied,
+      configsGenerated: !!stageC.configsGenerated,
+      manifestUpdated: !!stageC.manifestUpdated,
+      wrappersSynced: !!stageC.wrappersSynced,
+      userApproved: !!stageC.userApproved
+    }
+  };
+}
+
+function printStatus(state, repoRoot) {
+  const progress = getStageProgress(state);
+  const stageNames = { A: '需求 (Requirements)', B: '蓝图 (Blueprint)', C: '脚手架 (Scaffold)', complete: '完成' };
+
+  console.log('');
+  console.log('┌─────────────────────────────────────────────────────────┐');
+  console.log('│  初始化状态 (Init State)                                │');
+  console.log('├─────────────────────────────────────────────────────────┤');
+  console.log(`│  当前阶段: Stage ${progress.stage} - ${stageNames[progress.stage] || progress.stage}`);
+  console.log('│');
+
+  if (progress.stage === 'A' || progress.stage === 'B' || progress.stage === 'C') {
+    console.log('│  Stage A 进度:');
+    console.log(`│    必问问题: ${progress.stageA.mustAskAnswered}/${progress.stageA.mustAskTotal} 已完成`);
+    console.log(`│    文档撰写: ${progress.stageA.docsWritten}/${progress.stageA.docsTotal} 已完成`);
+    console.log(`│    验证状态: ${progress.stageA.validated ? '✓ 已验证' : '✗ 未验证'}`);
+    console.log(`│    用户确认: ${progress.stageA.userApproved ? '✓ 已确认' : '✗ 未确认'}`);
+  }
+
+  if (progress.stage === 'B' || progress.stage === 'C') {
+    console.log('│');
+    console.log('│  Stage B 进度:');
+    console.log(`│    蓝图起草: ${progress.stageB.drafted ? '✓' : '✗'}`);
+    console.log(`│    蓝图验证: ${progress.stageB.validated ? '✓' : '✗'}`);
+    console.log(`│    技能包审查: ${progress.stageB.packsReviewed ? '✓' : '✗'}`);
+    console.log(`│    用户确认: ${progress.stageB.userApproved ? '✓' : '✗'}`);
+  }
+
+  if (progress.stage === 'C' || progress.stage === 'complete') {
+    console.log('│');
+    console.log('│  Stage C 进度:');
+    console.log(`│    脚手架创建: ${progress.stageC.scaffoldApplied ? '✓' : '✗'}`);
+    console.log(`│    配置文件: ${progress.stageC.configsGenerated ? '✓' : '✗'}`);
+    console.log(`│    清单更新: ${progress.stageC.manifestUpdated ? '✓' : '✗'}`);
+    console.log(`│    Wrapper同步: ${progress.stageC.wrappersSynced ? '✓' : '✗'}`);
+  }
+
+  console.log('│');
+  console.log('│  下一步:');
+  if (progress.stage === 'A') {
+    if (!progress.stageA.validated) {
+      console.log('│    1. 完成需求访谈并撰写文档');
+      console.log('│    2. 运行: check-docs --docs-root docs/project');
+    } else if (!progress.stageA.userApproved) {
+      console.log('│    请用户审查 Stage A 文档并确认');
+      console.log('│    确认后运行: advance');
+    }
+  } else if (progress.stage === 'B') {
+    if (!progress.stageB.validated) {
+      console.log('│    1. 创建 docs/project/project-blueprint.json');
+      console.log('│    2. 运行: validate --blueprint docs/project/project-blueprint.json');
+    } else if (!progress.stageB.userApproved) {
+      console.log('│    请用户审查蓝图并确认');
+      console.log('│    确认后运行: advance');
+    }
+  } else if (progress.stage === 'C') {
+    if (!progress.stageC.wrappersSynced) {
+      console.log('│    运行: apply --blueprint docs/project/project-blueprint.json');
+    } else if (!progress.stageC.userApproved) {
+      console.log('│    初始化基本完成，请用户确认');
+      console.log('│    确认后可选运行: cleanup-init --apply --i-understand');
+    }
+  } else if (progress.stage === 'complete') {
+    console.log('│    初始化已完成！');
+  }
+
+  console.log('└─────────────────────────────────────────────────────────┘');
+  console.log('');
+}
+
+// ============================================================================
+// Config File Generation
+// ============================================================================
+
+function getConfigTemplateDir(language, packageManager) {
+  // Map language + packageManager to template directory
+  const mappings = {
+    'typescript-pnpm': 'typescript-pnpm',
+    'typescript-npm': 'typescript-pnpm',  // fallback
+    'typescript-yarn': 'typescript-pnpm', // fallback
+    'javascript-pnpm': 'typescript-pnpm', // fallback
+    'javascript-npm': 'typescript-pnpm',  // fallback
+    'go-go': 'go',
+    'go': 'go',
+    'cpp-xmake': 'cpp-xmake',
+    'c-xmake': 'cpp-xmake',
+    'cpp': 'cpp-xmake',
+    'c': 'cpp-xmake',
+    'react-native': 'react-native-typescript'
+  };
+
+  const key = `${language}-${packageManager}`.toLowerCase();
+  let templateName = mappings[key] || mappings[language] || null;
+
+  if (!templateName) return null;
+
+  const dir = path.join(TEMPLATES_DIR, 'scaffold-configs', templateName);
+  return fs.existsSync(dir) ? dir : null;
+}
+
+function renderTemplate(content, variables) {
+  let result = content;
+  for (const [key, value] of Object.entries(variables)) {
+    const pattern = new RegExp(`\\{\\{${key.replace(/\./g, '\\.')}\\}\\}`, 'g');
+    result = result.replace(pattern, value != null ? String(value) : '');
+  }
+  return result;
+}
+
+function flattenObject(obj, prefix = '') {
+  const result = {};
+  for (const [key, value] of Object.entries(obj || {})) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      Object.assign(result, flattenObject(value, fullKey));
+    } else {
+      result[fullKey] = value;
+    }
+  }
+  return result;
+}
+
+function generateConfigFiles(repoRoot, blueprint, apply) {
+  const results = [];
+  const repo = blueprint.repo || {};
+  const language = (repo.language || 'typescript').toLowerCase();
+  const packageManager = (repo.packageManager || 'pnpm').toLowerCase();
+  const layout = repo.layout || 'single';
+
+  const templateDir = getConfigTemplateDir(language, packageManager);
+  if (!templateDir) {
+    results.push({ file: '(none)', action: 'skip', reason: `no templates for ${language}-${packageManager}` });
+    return results;
+  }
+
+  const variables = flattenObject(blueprint);
+  
+  let templateFiles;
+  try {
+    templateFiles = fs.readdirSync(templateDir).filter(f => f.endsWith('.template'));
+  } catch (e) {
+    results.push({ file: templateDir, action: 'error', reason: e.message });
+    return results;
+  }
+
+  for (const templateFile of templateFiles) {
+    const targetName = templateFile.replace('.template', '');
+    const templatePath = path.join(templateDir, templateFile);
+    const targetPath = path.join(repoRoot, targetName);
+
+    // Skip workspace file for single layout
+    if ((targetName === 'pnpm-workspace.yaml' || targetName === 'pnpm-workspace.yml') && layout !== 'monorepo') {
+      results.push({ file: targetName, action: 'skip', reason: 'not monorepo' });
+      continue;
+    }
+
+    // Skip if file exists
+    if (fs.existsSync(targetPath)) {
+      results.push({ file: targetName, action: 'skip', reason: 'exists' });
+      continue;
+    }
+
+    const templateContent = fs.readFileSync(templatePath, 'utf8');
+    const rendered = renderTemplate(templateContent, variables);
+
+    if (apply) {
+      fs.writeFileSync(targetPath, rendered, 'utf8');
+      results.push({ file: targetName, action: 'write', mode: 'applied' });
+    } else {
+      results.push({ file: targetName, action: 'write', mode: 'dry-run' });
+    }
+  }
+
+  return results;
 }
 
 function packPrefixMap() {
@@ -482,10 +793,112 @@ function main() {
   const blueprintPath = resolvePath(repoRoot, opts['blueprint']);
   const docsRoot = resolvePath(repoRoot, opts['docs-root'] || path.join('docs', 'project'));
 
+  // ========== start ==========
+  if (command === 'start') {
+    const existingState = loadState(repoRoot);
+    if (existingState) {
+      console.log('[info] 检测到已存在的初始化状态');
+      printStatus(existingState, repoRoot);
+      console.log('[info] 如需重新开始，请先删除 init/.init-state.json');
+      process.exit(0);
+    }
+
+    const state = createInitialState();
+    addHistoryEvent(state, 'init_started', 'Initialization started');
+    saveState(repoRoot, state);
+
+    console.log('[ok] 初始化状态已创建: init/.init-state.json');
+    printStatus(state, repoRoot);
+    process.exit(0);
+  }
+
+  // ========== status ==========
+  if (command === 'status') {
+    const state = loadState(repoRoot);
+    if (!state) {
+      console.log('[info] 未检测到初始化状态');
+      console.log('[info] 运行 "start" 命令开始初始化');
+      process.exit(0);
+    }
+
+    if (format === 'json') {
+      console.log(JSON.stringify(getStageProgress(state), null, 2));
+    } else {
+      printStatus(state, repoRoot);
+    }
+    process.exit(0);
+  }
+
+  // ========== advance ==========
+  if (command === 'advance') {
+    const state = loadState(repoRoot);
+    if (!state) {
+      die('[error] 未检测到初始化状态，请先运行 "start" 命令');
+    }
+
+    const progress = getStageProgress(state);
+
+    if (progress.stage === 'A') {
+      if (!progress.stageA.validated) {
+        die('[error] Stage A 文档尚未验证，请先运行 check-docs');
+      }
+      console.log('\n== Stage A → B 检查点 ==\n');
+      console.log('Stage A 文档已验证通过。');
+      console.log('请确认用户已审查并批准 docs/project/ 下的需求文档。');
+      console.log('\n如果用户已确认，请手动更新状态：');
+      console.log('  将 init/.init-state.json 中 stageA.userApproved 设为 true');
+      console.log('  将 stage 设为 "B"');
+      process.exit(0);
+    }
+
+    if (progress.stage === 'B') {
+      if (!progress.stageB.validated) {
+        die('[error] Stage B 蓝图尚未验证，请先运行 validate');
+      }
+      console.log('\n== Stage B → C 检查点 ==\n');
+      console.log('Stage B 蓝图已验证通过。');
+      console.log('请确认用户已审查并批准 docs/project/project-blueprint.json。');
+      console.log('\n如果用户已确认，请手动更新状态：');
+      console.log('  将 init/.init-state.json 中 stageB.userApproved 设为 true');
+      console.log('  将 stage 设为 "C"');
+      process.exit(0);
+    }
+
+    if (progress.stage === 'C') {
+      if (!progress.stageC.wrappersSynced) {
+        die('[error] Stage C 尚未完成，请先运行 apply');
+      }
+      console.log('\n== Stage C 完成检查点 ==\n');
+      console.log('初始化已完成！');
+      console.log('\n可选：运行 cleanup-init --apply --i-understand 删除 init/ 目录');
+      
+      state.stage = 'complete';
+      state.stageC.userApproved = true;
+      addHistoryEvent(state, 'init_completed', 'Initialization completed');
+      saveState(repoRoot, state);
+      process.exit(0);
+    }
+
+    console.log('[info] 初始化已完成');
+    process.exit(0);
+  }
+
   if (command === 'validate') {
     if (!blueprintPath) die('[error] --blueprint is required for validate');
     const blueprint = readJson(blueprintPath);
     const v = validateBlueprint(blueprint);
+
+    // Auto-update state if validation passes
+    if (v.ok) {
+      const state = loadState(repoRoot);
+      if (state && state.stage === 'B') {
+        state.stageB.drafted = true;
+        state.stageB.validated = true;
+        addHistoryEvent(state, 'stage_b_validated', 'Stage B blueprint validated');
+        saveState(repoRoot, state);
+        console.log('[auto] 状态已更新: stageB.validated = true');
+      }
+    }
 
     const result = {
       ok: v.ok,
@@ -508,6 +921,23 @@ function main() {
     const summary = ok
       ? `[ok] Stage A docs check passed: ${path.relative(repoRoot, docsRoot)}`
       : `[error] Stage A docs check failed: ${path.relative(repoRoot, docsRoot)}`;
+
+    // Auto-update state if validation passes
+    if (ok) {
+      const state = loadState(repoRoot);
+      if (state && state.stage === 'A') {
+        state.stageA.validated = true;
+        state.stageA.docsWritten = {
+          requirements: fs.existsSync(path.join(docsRoot, 'requirements.md')),
+          nfr: fs.existsSync(path.join(docsRoot, 'non-functional-requirements.md')),
+          glossary: fs.existsSync(path.join(docsRoot, 'domain-glossary.md')),
+          riskQuestions: fs.existsSync(path.join(docsRoot, 'risk-open-questions.md'))
+        };
+        addHistoryEvent(state, 'stage_a_validated', 'Stage A docs validated');
+        saveState(repoRoot, state);
+        console.log('[auto] 状态已更新: stageA.validated = true');
+      }
+    }
 
     printResult({ ok, errors: res.errors, warnings: res.warnings, summary }, format);
     process.exit(ok ? 0 : 1);
@@ -582,6 +1012,7 @@ function main() {
     if (!blueprintPath) die('[error] --blueprint is required for apply');
     const providers = opts['providers'] || 'both';
     const requireStageA = !!opts['require-stage-a'];
+    const skipConfigs = !!opts['skip-configs'];
     const cleanup = !!opts['cleanup-init'];
 
     if (cleanup && !opts['i-understand']) {
@@ -610,8 +1041,20 @@ function main() {
       console.warn(`[warn] Run: suggest-packs --blueprint ${path.relative(repoRoot, blueprintPath)} --write  (or edit blueprint.skills.packs manually)`);
     }
 
-    // Scaffold
+    // Scaffold directories
     const scaffoldPlan = planScaffold(repoRoot, blueprint, true);
+
+    // Generate config files (default: enabled)
+    let configResults = [];
+    if (!skipConfigs) {
+      configResults = generateConfigFiles(repoRoot, blueprint, true);
+      console.log('[ok] Config files generated.');
+      for (const r of configResults) {
+        const mode = r.mode ? ` (${r.mode})` : '';
+        const reason = r.reason ? ` [${r.reason}]` : '';
+        console.log(`  - ${r.action}: ${r.file}${mode}${reason}`);
+      }
+    }
 
     // Manifest update
     const manifestResult = updateManifest(repoRoot, blueprint, true);
@@ -622,6 +1065,18 @@ function main() {
     // Sync wrappers
     const syncResult = syncWrappers(repoRoot, providers, true);
     if (syncResult.mode === 'failed') die(`[error] sync-skills.js failed with exit code ${syncResult.exitCode}`);
+
+    // Auto-update state
+    const state = loadState(repoRoot);
+    if (state) {
+      state.stageC.scaffoldApplied = true;
+      state.stageC.configsGenerated = !skipConfigs;
+      state.stageC.manifestUpdated = true;
+      state.stageC.wrappersSynced = syncResult.mode === 'applied';
+      addHistoryEvent(state, 'stage_c_applied', 'Stage C apply completed');
+      saveState(repoRoot, state);
+      console.log('[auto] 状态已更新: stageC.* = true');
+    }
 
     // Optional cleanup
     let cleanupResult = null;
@@ -639,6 +1094,7 @@ function main() {
         docsRoot: path.relative(repoRoot, docsRoot),
         stageA: stageARes,
         scaffold: scaffoldPlan,
+        configs: configResults,
         manifest: manifestResult,
         sync: syncResult,
         cleanup: cleanupResult
