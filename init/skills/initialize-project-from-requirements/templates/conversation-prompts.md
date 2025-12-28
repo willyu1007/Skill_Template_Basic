@@ -96,6 +96,43 @@ Write to:
 - Stage A: `docs/project/non-functional-requirements.md`
 - Stage B: `quality.*`
 
+### B5. Tech Stack module (MUST-ask for new projects)
+
+Ask these to populate `repo.language`, `repo.packageManager`, and `capabilities.*.framework` in the blueprint.
+
+**Primary programming language**
+- "What is the primary programming language? (typescript, javascript, python, go, java, dotnet, other)"
+- If the user is unsure, suggest based on project requirements (e.g., TypeScript for full-stack web apps, Python for data-heavy projects, Go for high-performance services)
+
+**Package manager**
+- "Which package manager will you use? (npm, pnpm, yarn, pip, poetry, go, maven, gradle, dotnet, other)"
+- If the user is unsure, suggest based on language:
+  - TypeScript/JavaScript: pnpm (recommended), npm, or yarn
+  - Python: poetry (recommended) or pip
+  - Go: go (built-in)
+  - Java: maven or gradle
+  - .NET: dotnet (built-in)
+
+**Frontend framework** (if `capabilities.frontend.enabled == true`)
+- "Which frontend framework will you use? (react, vue, angular, svelte, nextjs, remix, other)"
+- If the user is unsure, suggest based on project scale and team preferences
+
+**Backend framework** (if `capabilities.backend.enabled == true`)
+- "Which backend framework will you use? (express, fastify, nestjs, fastapi, spring, gin, fiber, other)"
+- If the user is unsure, suggest based on language and requirements:
+  - Node.js: express (simple), fastify (performance), nestjs (structure)
+  - Python: fastapi (modern APIs), django (full-featured), flask (lightweight)
+  - Go: gin (popular), fiber (express-like), echo (lightweight)
+  - Java: spring boot (enterprise)
+
+**Template coverage note**
+- If the selected language/framework combination has a template in `templates/scaffold-configs/`, inform the user that base config files will be auto-generated.
+- If no template exists, explain that you will provide guidance on what config files are needed based on the selected tech stack, and suggest creating them manually or with framework-specific tooling.
+
+Write to:
+- Stage B: `repo.language`, `repo.packageManager`, `capabilities.frontend.framework`, `capabilities.backend.framework`
+- Stage A: `docs/project/non-functional-requirements.md` (tech stack section, if needed for documentation)
+
 ## C. Answer → Artifact mapping cheat sheet
 
 Use this mapping to avoid "knowledge floating in chat":
@@ -103,6 +140,7 @@ Use this mapping to avoid "knowledge floating in chat":
 - Scope (MUST/OUT) → `docs/project/requirements.md` (`## Goals`, `## Non-goals`)
 - User journeys + AC → `docs/project/requirements.md` (`## Users and user journeys`)
 - Constraints/NFR → `docs/project/non-functional-requirements.md`
+- Tech stack decisions → `docs/project/project-blueprint.json` (`repo.language`, `repo.packageManager`, `capabilities.*.framework`)
 - Glossary terms/entities → `docs/project/domain-glossary.md`
 - TBD decisions/risks → `docs/project/risk-open-questions.md`
 - Repo layout/pack selection decisions → `docs/project/project-blueprint.json`

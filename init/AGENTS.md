@@ -25,6 +25,7 @@ Minimum required inputs:
 - in-scope MUST requirements and out-of-scope (OUT)
 - top user journeys with acceptance criteria
 - constraints (compliance/security/platform/deadlines/integrations)
+- tech stack (programming language, package manager, frontend/backend frameworks)
 - repo layout intent (`single` vs `monorepo`)
 - quality expectations (testing/CI/devops)
 

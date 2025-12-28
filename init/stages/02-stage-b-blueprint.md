@@ -18,7 +18,12 @@ Schema reference:
 
 1. Encode only the decisions needed for scaffolding and skill selection.
 2. Keep implementation detail in Stage A docs (not in the blueprint).
-3. Select `skills.packs` (at minimum include `workflows`).
+3. Populate tech stack fields:
+   - `repo.language`: primary programming language (typescript, javascript, python, go, java, dotnet, other)
+   - `repo.packageManager`: package manager (npm, pnpm, yarn, pip, poetry, go, maven, gradle, dotnet, other)
+   - `capabilities.frontend.framework`: frontend framework (if frontend is enabled)
+   - `capabilities.backend.framework`: backend framework (if backend is enabled)
+4. Select `skills.packs` (at minimum include `workflows`).
 
 ## Verification
 

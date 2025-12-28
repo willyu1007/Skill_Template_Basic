@@ -18,9 +18,13 @@ Create a minimal scaffold and enable the right skill packs, then sync provider-n
 
 ## Steps
 
-1. Dry-run scaffold (required):
-2. Apply scaffold + manifest update + wrapper sync.
-3. Optionally remove the `init/` kit after success.
+1. Dry-run scaffold (required): Review what will be created.
+2. Check config template coverage:
+   - The `apply` command will auto-generate config files if a template exists for the selected `repo.language` + `repo.packageManager` combination.
+   - Available templates: `typescript-pnpm`, `go`, `cpp-xmake`, `react-native-typescript`.
+   - If no template exists, provide guidance on essential config files needed and suggest using framework-specific CLI tools.
+3. Apply scaffold + manifest update + wrapper sync.
+4. Optionally remove the `init/` kit after success.
 
 ## Verification
 

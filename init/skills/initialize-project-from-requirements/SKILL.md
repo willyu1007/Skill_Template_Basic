@@ -144,21 +144,30 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.js a
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.js scaffold   --blueprint docs/project/project-blueprint.json   --repo-root .
 ```
 
-2. Apply scaffold + manifest update + wrapper sync:
+2. **Handle config template coverage**:
+   - Check if the selected `repo.language` + `repo.packageManager` combination has a template in `templates/scaffold-configs/`.
+   - **If a template exists**: The `apply` command will auto-generate base config files (e.g., `package.json`, `tsconfig.json`, `go.mod`).
+   - **If no template exists**: You MUST provide guidance to the user:
+     - Recommend essential config files based on the selected tech stack (e.g., for Python: `requirements.txt` or `pyproject.toml`, for Java: `pom.xml` or `build.gradle`).
+     - Suggest using framework-specific CLI tools (e.g., `npm init`, `poetry init`, `dotnet new`) to generate starter configs.
+     - Document the recommended config structure in `docs/project/non-functional-requirements.md` or create a brief setup guide.
+     - Do NOT skip this step; users need clear next steps even when templates are unavailable.
+
+3. Apply scaffold + manifest update + wrapper sync:
 
 ```bash
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.js apply   --blueprint docs/project/project-blueprint.json   --repo-root .   --providers codex,claude   --require-stage-a
 ```
 
-3. **Self-review**: Complete Stage C checklist in `templates/quality-checklist.md`.
-4. **CHECKPOINT C Complete**: Use prompt from `templates/stage-checkpoints.md` to confirm completion.
-5. Wait for explicit user approval, then run:
+4. **Self-review**: Complete Stage C checklist in `templates/quality-checklist.md`.
+5. **CHECKPOINT C Complete**: Use prompt from `templates/stage-checkpoints.md` to confirm completion.
+6. Wait for explicit user approval, then run:
 
 ```bash
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.js approve --stage C
 ```
 
-6. (Optional) Remove the bootstrap kit after user explicitly requests:
+7. (Optional) Remove the bootstrap kit after user explicitly requests:
 
 ```bash
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.js cleanup-init   --repo-root .   --apply   --i-understand
@@ -201,6 +210,16 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.js c
 | `scaffold-configs.js` | Advanced: regenerate config files only, without running the full pipeline |
 
 The `apply` command generates config files by default. Use `--skip-configs` to disable this. The standalone `scaffold-configs.js` is useful when you only need to update configs (e.g., after editing the blueprint) without re-running the entire scaffold process.
+
+**Template coverage and fallback behavior:**
+
+- Available templates are in `templates/scaffold-configs/` (currently: `typescript-pnpm/`, `go/`, `cpp-xmake/`, `react-native-typescript/`).
+- When a template exists, config files are auto-generated during `apply`.
+- When no template exists, you MUST provide user guidance:
+  - Recommend essential config files based on the selected language/framework.
+  - Suggest framework-specific CLI commands (e.g., `npm init`, `poetry init`).
+  - Document recommendations in project docs or create a setup guide.
+  - Do NOT leave users without clear next steps.
 
 ### Examples
 
