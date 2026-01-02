@@ -19,7 +19,7 @@ init/                      # START HERE
 
 .ai/skills/                # SSOT for skills (incl. workflows)
 .ai/scripts/               # Sync scripts
-`-- sync-skills.cjs          # Refresh .codex/.claude skill stubs
+.ai/llm/                   # LLM governance entry + registries (providers/profiles/prompts/config)
 
 dev/                       # Development documentation
 |-- README.md              # Dev Docs Pattern guide
