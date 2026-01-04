@@ -1,6 +1,6 @@
 # Initialization Instructions (LLM)
 
-You are initializing a new project using this repository template.
+You are initializing a new project using the repository template.
 
 ## Conclusions (read first)
 
@@ -56,7 +56,7 @@ Run:
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs --docs-root init/stage-a-docs
 ```
 
-If this repo uses a strict gate, run:
+If the repo uses a strict gate, run:
 
 ```bash
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs --docs-root init/stage-a-docs --strict
@@ -104,7 +104,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs apply   --blueprint init/project-blueprint.json   --repo-root .   --providers codex,claude   --require-stage-a
 ```
 
-This will:
+The apply command will:
 - create missing scaffold directories (no overwrites),
 - update `.ai/skills/_meta/sync-manifest.json` (collection: `current`),
 - run `node .ai/scripts/sync-skills.cjs` to regenerate wrappers.
@@ -123,7 +123,7 @@ If the user decides to remove `agent_builder` after initialization is complete, 
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs prune-agent-builder   --repo-root .   --apply   --i-understand
 ```
 
-This will remove `.ai/skills/workflows/agent` and re-sync wrappers.
+The prune-agent-builder command will remove `.ai/skills/workflows/agent` and re-sync wrappers.
 
 ### Optional: remove init kit after success
 

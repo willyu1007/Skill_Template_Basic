@@ -17,7 +17,7 @@ Goals:
 
 ## When to use
 
-Use this skill when:
+Use the code-review-standards skill when:
 - Reviewing pull requests / merge requests
 - Preparing code for review (self-review checklist)
 - Setting up team review guidelines

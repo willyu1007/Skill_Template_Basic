@@ -1,4 +1,4 @@
-# Add Feature Flag for New Checkout — Implementation Plan
+# Add Feature Flag for New Checkout — Roadmap
 
 ## Goal
 - Introduce a feature flag to safely roll out the new checkout flow to a subset of users, with a clean rollback path.
@@ -95,15 +95,18 @@
 If a detailed bundle is required, create:
 
 ```
-dev/active/<task>/dev-docs/
+dev-docs/active/<task>/
+  roadmap.md              # Macro-level planning (plan-maker)
   00-overview.md
   01-plan.md
   02-architecture.md
   03-implementation-notes.md
   04-verification.md
+  05-pitfalls.md
 ```
 
 ## To-dos
 - [ ] Confirm flag system and rollout capability
 - [ ] Confirm success metrics and dashboards
 - [ ] Confirm rollout schedule and owners
+

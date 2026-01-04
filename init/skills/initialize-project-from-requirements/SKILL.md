@@ -13,17 +13,17 @@ Turn an early project idea into **verifiable, file-based** outputs:
 - **Stage B (Blueprint)**: a machine-readable `init/project-blueprint.json`
 - **Stage C (Scaffold + Skills)**: a minimal scaffold + skill pack manifest update + wrapper sync via `node .ai/scripts/sync-skills.cjs`
 
-This skill is designed to be **bootstrap-only**. After initialization, you may remove the `init/` kit.
+The initialize-project-from-requirements skill is designed to be **bootstrap-only**. After initialization, you may remove the `init/` kit.
 
 ## When to use
 
-Use this when:
+Use the initialize-project-from-requirements skill when:
 
 - The repo still contains an `init/` directory (bootstrap kit present).
 - The user needs a clear, reviewable project description before implementation starts.
 - You want deterministic initialization outputs (docs + blueprint + minimal scaffold + skills enabled).
 
-Do NOT use this when:
+Do NOT use the skill when:
 
 - The repo has already been initialized and `init/project-blueprint.json` is stable.
 - The user is asking for implementation work unrelated to initialization.
@@ -86,7 +86,7 @@ Optional inputs:
 1. **Initialize state**: Run `node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs start` to create `init/.init-state.json` and seed `init/stage-a-docs/` + `init/project-blueprint.json` templates.
 2. Use `templates/conversation-prompts.md` to run a structured requirements interview.
 3. Confirm whether the heavy `agent_builder` workflow is needed; if not, plan to run Stage C with `--skip-agent-builder --i-understand`.
-4. Update state as each question is answered (`stageA.mustAsk.*`).
+4. Update state as each question is answered (`stage-a.mustAsk.*`).
 5. Draft the four Stage A documents using templates under `templates/`.
 6. **Self-review**: Complete Stage A checklist in `templates/quality-checklist.md`.
 7. Validate Stage A docs:
@@ -152,7 +152,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
      - Recommend essential config files based on the selected tech stack (e.g., for Python: `requirements.txt` or `pyproject.toml`, for Java: `pom.xml` or `build.gradle`).
      - Suggest using framework-specific CLI tools (e.g., `npm init`, `poetry init`, `dotnet new`) to generate starter configs.
      - Document the recommended config structure in `init/stage-a-docs/non-functional-requirements.md` or create a brief setup guide.
-     - Do NOT skip this step; users need clear next steps even when templates are unavailable.
+     - Do NOT skip the guidance step; users need clear next steps even when templates are unavailable.
 
 3. Apply scaffold + manifest update + wrapper sync:
 
@@ -184,7 +184,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 
 - Do not invent requirements. Resolve ambiguity with the user, or record it as TBD in `init/stage-a-docs/risk-open-questions.md`.
 - Do not add provider-specific assumptions into Stage A docs or the blueprint.
-- Do not edit `.codex/skills/` or `.claude/skills/` directly. Only update SSOT in `.ai/skills/` and run `node .ai/scripts/sync-skills.cjs`. (This repo’s SSOT rule applies.) 
+- Do not edit `.codex/skills/` or `.claude/skills/` directly. Only update SSOT in `.ai/skills/` and run `node .ai/scripts/sync-skills.cjs`. (The repo's SSOT rule applies.) 
 - Scaffolding MUST NOT overwrite existing files; it should only create missing directories and small placeholder `README.md` files.
 
 ## Included assets
@@ -216,7 +216,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 | `apply` command (default) | Main workflow: scaffold + configs + manifest + wrapper sync in one step |
 | `scaffold-configs.js` | Advanced: regenerate config files only, without running the full pipeline |
 
-The `apply` command generates config files by default. Use `--skip-configs` to disable this. The standalone `scaffold-configs.js` is useful when you only need to update configs (e.g., after editing the blueprint) without re-running the entire scaffold process.
+The `apply` command generates config files by default. Use `--skip-configs` to disable config generation. The standalone `scaffold-configs.js` is useful when you only need to update configs (e.g., after editing the blueprint) without re-running the entire scaffold process.
 
 **Template coverage and fallback behavior:**
 

@@ -2,7 +2,7 @@
 
 ## Conclusions (read first)
 
-- Use this as a **question bank** for Stage A. Ask the **MUST-ask** set first, then use **branch modules** based on the project's capabilities.
+- Use the prompts as a **question bank** for Stage A. Ask the **MUST-ask** set first, then use **branch modules** based on the project's capabilities.
 - Every answer MUST be written into a file artifact:
   - Stage A docs under `init/stage-a-docs/` (human-readable SSOT for intent)
   - Stage B blueprint at `init/project-blueprint.json` (machine-readable SSOT for scaffolding / pack selection)
@@ -139,7 +139,7 @@ Write to:
 
 ## C. Answer → Artifact mapping cheat sheet
 
-Use this mapping to avoid "knowledge floating in chat":
+Use the following mapping to avoid "knowledge floating in chat":
 
 - Scope (MUST/OUT) → `init/stage-a-docs/requirements.md` (`## Goals`, `## Non-goals`)
 - User journeys + AC → `init/stage-a-docs/requirements.md` (`## Users and user journeys`)

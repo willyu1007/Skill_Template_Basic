@@ -18,9 +18,9 @@ Use this skill when you are:
 - Debugging “middleware order” issues
 
 ## Inputs
-- The middleware’s responsibility and scope (global vs route-specific)
-- Where it should run in the request lifecycle (before/after auth, before validation, etc.)
-- What context it reads/writes (e.g., user identity, request ID)
+- The middleware's responsibility and scope (global vs route-specific)
+- Where the middleware should run in the request lifecycle (before/after auth, before validation, etc.)
+- What context the middleware reads/writes (e.g., user identity, request ID)
 
 ## Outputs
 - A middleware function with clear invariants
@@ -55,15 +55,15 @@ A common order for HTTP services:
 ## Rules
 - Middleware MUST be single-purpose and composable.
 - Middleware MUST NOT embed business logic (belongs in services).
-- Middleware that adds context SHOULD attach it to a typed request context (or `res.locals` pattern).
+- Middleware that adds context SHOULD attach the context to a typed request object (or `res.locals` pattern).
 - Error middleware MUST be last in the chain.
 
 ## Steps
 1. Define the middleware contract:
-   - inputs it reads
-   - outputs/side effects it writes
+   - inputs the middleware reads
+   - outputs/side effects the middleware writes
    - failure modes (status code + error shape)
-2. Decide where it sits in the chain (and why).
+2. Decide where the middleware sits in the chain (and why).
 3. Implement:
    - short, readable logic
    - consistent error mapping

@@ -17,7 +17,7 @@ Use this skill when:
 - A task is completed and ready to archive
 
 ## Inputs
-- Task directory (e.g., `dev/active/<task-name>/`)
+- Task directory (e.g., `dev-docs/active/<task-slug>/`)
 - Current progress summary
 - Key decisions and tradeoffs
 - What remains to be done
@@ -53,7 +53,7 @@ Use this skill when:
    - append resolved failures and dead ends (historical lessons, not current issues)
    - keep the do-not-repeat summary current (fast scan for future contributors)
 7. If status is `done` and verification is complete:
-   - propose moving `dev/active/<task-name>/` to `dev/archive/<task-name>/`
+   - propose moving `dev-docs/active/<task-slug>/` to `dev-docs/archive/<task-slug>/`
    - obtain approval before moving
 
 ## Verification
@@ -64,7 +64,7 @@ Use this skill when:
 - [ ] `05-pitfalls.md` is updated for any important failures and the summary is current
 - [ ] Handoff docs are sufficient for another contributor to continue
 - [ ] No secrets or credentials in documentation
-- [ ] If archived: task moved to `dev/archive/` after approval
+- [ ] If archived: task moved to `dev-docs/archive/` after approval
 
 ## Boundaries
 - MUST NOT include secrets, credentials, or sensitive data in handoff docs

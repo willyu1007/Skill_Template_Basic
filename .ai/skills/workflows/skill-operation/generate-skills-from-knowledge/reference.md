@@ -79,7 +79,7 @@ Principles:
 - the plan explicitly records split/merge decisions and rationale
 
 ## Minimal prompt template (for any LLM)
-Use this when asking an LLM to generate or refine a plan:
+Use the following template when asking an LLM to generate or refine a plan:
 
 Goal:
 - Convert the provided knowledge docs into a provider-agnostic Agent Skills bundle.
@@ -111,7 +111,7 @@ Acceptance criteria:
 
 # Skill Authoring Standards
 
-This section defines the skill authoring standard for this repository.
+The following section defines the skill authoring standard for the repository.
 
 ## Source of Truth (SSOT)
 

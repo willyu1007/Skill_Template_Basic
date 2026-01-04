@@ -13,13 +13,13 @@ Treat the project codebase as the schema Single Source of Truth (SSOT) and safel
 - execution logging and post-verification
 
 ## When to use
-Use this skill when the user asks to:
+Use the sync-db-schema-from-code skill when the user asks to:
 - apply schema changes from the project to a remote database
 - deploy database migrations to a managed database (cloud or self-hosted)
 - sync Prisma or ORM model changes to an actual database
 - verify and resolve schema drift before releasing
 
-Avoid this skill when:
+Avoid the skill when:
 - the user wants to pull/introspect schema from the database back into code (reverse direction)
 - the task is primarily data migration/backfill (separate workflow)
 

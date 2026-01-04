@@ -1,4 +1,4 @@
-﻿# AI-Friendly Repository Template
+# AI-Friendly Repository Template
 
 A starter kit for creating LLM-optimized codebases with Single Source of Truth (SSOT) architecture.
 
@@ -19,9 +19,9 @@ init/                      # START HERE
 
 .ai/skills/                # SSOT for skills (incl. workflows)
 .ai/scripts/               # Sync scripts
-.ai/llm/                   # LLM governance entry + registries (providers/profiles/prompts/config)
+.ai/llm-config/            # LLM governance entry + registries (providers/profiles/prompts/config)
 
-dev/                       # Development documentation
+dev-docs/                  # Development documentation
 |-- README.md              # Dev Docs Pattern guide
 |-- active/                # Current tasks
 `-- archive/               # Completed tasks
@@ -39,10 +39,9 @@ dev/                       # Development documentation
 ## Documentation
 
 - [Initialization Guide](init/README.md)
-- [Dev Docs Pattern](dev/README.md)
+- [Dev Docs Pattern](dev-docs/README.md)
 - [Documentation Guidelines](.ai/skills/standards/documentation-guidelines/SKILL.md)
 - [Naming Conventions](.ai/skills/standards/naming-conventions/SKILL.md)
-
 
 
 

@@ -2,13 +2,13 @@
 
 ## Conclusions (read first)
 
-- Stage A quality is enforced by **structure + placeholders** checks (`check-docs`). It does not attempt deep semantic evaluation.
+- Stage A quality is enforced by **structure + placeholders** checks (`check-docs`). The check-docs command does not attempt deep semantic evaluation.
 - Stage B (blueprint) is the **only machine-readable SSOT** used for Stage C scaffolding and skill pack selection.
 - Pack selection MUST be explicit:
   - declared in `init/project-blueprint.json` (`skills.packs`)
   - materialized into `.ai/skills/_meta/sync-manifest.json` (collection: `current`)
   - synced into provider wrappers by `node .ai/scripts/sync-skills.cjs`
-- This init kit is intentionally **bootstrap-only**. If you remove `init/`, archive Stage A + blueprint to `docs/project/` if you want to keep them as long-term assets, and keep:
+- The init kit is intentionally **bootstrap-only**. If you remove `init/`, archive Stage A + blueprint to `docs/project/` if you want to keep them as long-term assets, and keep:
   - `docs/project/` artifacts (when archived), and
   - `.ai/skills/_meta/sync-manifest.json`
 
@@ -47,7 +47,7 @@ Use strict mode as a gate when you want a strong “ready-to-blueprint” signal
 
 ## 2. Requirements → Blueprint mapping guide
 
-This mapping exists to prevent “design decisions living only in chat”.
+The mapping exists to prevent "design decisions living only in chat".
 
 ### 2.1 Mapping principles (MUST)
 
@@ -97,7 +97,7 @@ Packs are a discovery/filter mechanism. They allow you to enable a subset of ski
 
 ### 3.2 Recommended mapping (current init kit)
 
-This init script uses the following conceptual mapping:
+The init script uses the following conceptual mapping:
 
 | Capability / intent | Suggested pack |
 |---|---|
@@ -113,7 +113,7 @@ The script emits warnings when:
 ### 3.3 Auto-suggest vs auto-enable
 
 - Default behavior: **warn + suggest** only.
-- Opt-in behavior: `suggest-packs --write` will **add** missing recommended packs to `skills.packs` (it will not remove any extras).
+- Opt-in behavior: `suggest-packs --write` will **add** missing recommended packs to `skills.packs` (the command will not remove any extras).
 
 ---
 
@@ -121,7 +121,7 @@ The script emits warnings when:
 
 Stage C updates `.ai/skills/_meta/sync-manifest.json`:
 
-- It only mutates `collections.current`:
+- Stage C only mutates `collections.current`:
   - `includePrefixes` computed from `skills.packs`
   - optional `excludePrefixes` and `excludeSkillNames` if present in the blueprint
 
@@ -141,7 +141,7 @@ If the user does not need the `agent_builder` workflow, run Stage C with:
 --skip-agent-builder --i-understand
 ```
 
-This removes `.ai/skills/workflows/agent` before wrapper sync.
+The flag removes `.ai/skills/workflows/agent` before wrapper sync.
 
 **Option B: After initialization**
 
@@ -151,7 +151,7 @@ If the decision to remove `agent_builder` is made after initialization, use:
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs prune-agent-builder --apply --i-understand
 ```
 
-This removes `.ai/skills/workflows/agent` and re-syncs wrappers.
+The command removes `.ai/skills/workflows/agent` and re-syncs wrappers.
 
 ---
 

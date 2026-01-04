@@ -25,15 +25,14 @@ Use this skill when:
 A new task directory with a standard set of docs, e.g.:
 
 ```
-dev/
-  active/
-    <task-name>/
-      00-overview.md
-      01-plan.md
-      02-architecture.md
-      03-implementation-notes.md
-      04-verification.md
-      05-pitfalls.md
+dev-docs/active/<task-slug>/
+  roadmap.md              # Macro-level planning (plan-maker, optional)
+  00-overview.md
+  01-plan.md
+  02-architecture.md
+  03-implementation-notes.md
+  04-verification.md
+  05-pitfalls.md
 ```
 
 (Adjust directory naming to match your repository conventions if different.)
@@ -47,7 +46,7 @@ dev/
 - Avoid embedding secrets or real credentials.
 
 ## Steps
-1. Create `dev/active/<task-name>/`.
+1. Create `dev-docs/active/<task-slug>/`.
 2. Write `00-overview.md`:
    - problem statement
    - goal
@@ -89,6 +88,9 @@ dev/
 - MUST NOT create plans without acceptance criteria
 - SHOULD NOT deviate from the standard directory layout without justification
 - SHOULD keep overview high-level (implementation detail belongs elsewhere)
+- PRODUCES implementation-level documentation bundle (overview, plan, architecture, notes, verification, pitfalls)
+- DOES NOT produce macro-level roadmaps (milestone definitions, scope/impact analysis, rollback strategies)
+- If a macro roadmap exists, use it as input; the `01-plan.md` here captures step-level execution detail, not phase/milestone planning
 
 ## Included assets
 - Templates:

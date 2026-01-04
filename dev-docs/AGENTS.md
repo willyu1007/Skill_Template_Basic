@@ -14,21 +14,23 @@ Persistent task documentation for context preservation across sessions.
 ## Directory Structure
 
 ```
-dev/
-  active/<task-name>/     # Current work
-    00-overview.md        # Goal, non-goals, status
-    01-plan.md            # Phases, milestones, acceptance criteria
-    02-architecture.md    # Boundaries, interfaces, risks
+dev-docs/
+  active/<task-slug>/
+    roadmap.md              # Macro-level planning (plan-maker)
+    00-overview.md          # Goal, non-goals, status
+    01-plan.md              # Phases, milestones, acceptance criteria
+    02-architecture.md      # Boundaries, interfaces, risks
     03-implementation-notes.md  # Decisions, changes, rationale
-    04-verification.md    # Checks run, results
-    05-pitfalls.md        # Resolved failures, historical lessons, "do-not-repeat" notes
-  archive/                # Completed tasks
+    04-verification.md      # Checks run, results
+    05-pitfalls.md          # Resolved failures, historical lessons, "do-not-repeat" notes
+  archive/                  # Completed tasks
 ```
 
 ## File Purposes
 
 | File | Contains | Update Frequency |
 |------|----------|------------------|
+| `roadmap.md` | Macro-level planning: milestones, scope, risks, rollback | On initial planning |
 | `00-overview.md` | Goal, non-goals, current status | On status change |
 | `01-plan.md` | Phases, steps, acceptance criteria | On scope change |
 | `02-architecture.md` | Boundaries, interfaces, key risks | On design decision |
@@ -40,7 +42,7 @@ dev/
 
 ### On Context Reset
 
-1. Read `dev/active/<task-name>/00-overview.md`
+1. Read `dev-docs/active/<task-slug>/00-overview.md`
 2. Read `01-plan.md`
 3. Read `05-pitfalls.md` (scan the `do-not-repeat` summary first)
 4. Consult other files as needed
@@ -63,7 +65,7 @@ dev/
 ### Archive Rules
 
 When task status changes to "done" and all verification passes:
-1. Move `dev/active/<task-name>/` to `dev/archive/<task-name>/`
+1. Move `dev-docs/active/<task-slug>/` to `dev-docs/archive/<task-slug>/`
 2. This is handled by `update-dev-docs-for-handoff` when status=done
 
 ## Skip Conditions

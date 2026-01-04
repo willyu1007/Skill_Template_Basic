@@ -1,6 +1,6 @@
 ---
 name: naming-conventions
-description: Apply consistent naming conventions for directories, files, and identifiers - covers kebab-case rules, SSOT layout, and skill naming standards.
+description: Apply consistent naming conventions for directories, files, and identifiers - covers kebab-case rules, SSOT layout, skill naming standards, and script-generated file paths (including temporary files under .ai/.tmp/).
 ---
 
 # Naming Conventions
@@ -19,6 +19,7 @@ Use this skill when:
 - Naming skills, workflows, or commands
 - Reviewing code for naming consistency
 - Setting up CI checks for naming standards
+- **Scripts generating files** (see Script Integration below)
 
 ## Inputs
 
@@ -37,6 +38,27 @@ Use this skill when:
 3. Propose 2–3 candidates and select the one that matches existing local conventions and avoids ambiguous abbreviations.
 4. Apply the chosen name consistently across declarations and references (imports, exports, docs, and tests).
 5. Verify that the resulting names are searchable, unambiguous, and do not collide with existing names.
+
+## Script Integration (MUST)
+
+Scripts that generate files MUST follow the naming conventions defined in this skill.
+
+**Requirements:**
+- Declare reference to this skill in script header comments
+- Generated file/directory names MUST use kebab-case
+- Validate output names against convention rules before writing
+
+**Reference comment example:**
+```javascript
+/**
+ * @reference .ai/skills/standards/naming-conventions/SKILL.md
+ */
+```
+
+**Implementation guidance:**
+- Import or read this skill path when generating output paths
+- Scripts under `.ai/scripts/` should programmatically validate generated names
+- When scaffolding projects, apply kebab-case to all generated directories/files
 
 ## Global Rules (MUST)
 
@@ -71,6 +93,25 @@ Notes:
 - `docs/project/`: project-specific documentation (requirements, blueprints)
 - `scripts/`: script entrypoints (cross-platform can share the same base name with different suffixes)
 - `init/`: bootstrap materials (if present)
+
+### Temporary Directory (MUST)
+
+Use `.ai/.tmp/` for temporary environments, caches, and generated intermediate files.
+
+**Rules:**
+- All temporary files MUST be placed under `.ai/.tmp/`
+- Do NOT create `temp/`, `tmp/`, `temporary/`, or similar directories elsewhere
+- `.ai/.tmp/` SHOULD be added to `.gitignore`
+- Script-generated artifacts, build caches, and intermediate outputs go here
+
+**Usage examples:**
+- `.ai/.tmp/cache/` - cached data for scripts
+- `.ai/.tmp/build/` - intermediate build outputs
+- `.ai/.tmp/sandbox/` - temporary test environments
+
+**Cleanup:**
+- Scripts are responsible for cleaning up their own temporary files
+- Stale files in `.ai/.tmp/` may be deleted without notice
 
 ## Skill Naming (MUST)
 
