@@ -1,0 +1,74 @@
+---
+name: update-dev-docs-for-handoff
+description: Update an existing dev-docs task bundle with progress, decisions, and verification evidence to enable clean handoff, context recovery, or archival.
+---
+
+# Update Dev Docs for Handoff
+
+## Purpose
+Keep task documentation current so another engineer (or future you) can understand what was done, why, and how to verify or continue work.
+
+## When to use
+Use this skill when:
+- A task is paused and will be resumed later
+- You are handing off work to another contributor
+- You are about to compress context or close a long-running thread
+- A refactor changed the plan and decisions must be recorded
+- A task is completed and ready to archive
+
+## Inputs
+- Task directory (e.g., `dev/active/<task-name>/`)
+- Current progress summary
+- Key decisions and tradeoffs
+- What remains to be done
+- Verification status (what was run, what passed/failed)
+
+## Outputs
+- Updated task docs:
+  - progress summary
+  - “what changed” notes
+  - updated plan (if needed)
+  - verification checklist and current status
+
+## Steps
+1. Update `00-overview.md`:
+   - current status (`planned | in-progress | blocked | done`)
+   - any scope changes
+   - the next concrete step
+2. Update `01-plan.md`:
+   - mark completed milestones
+   - re-sequence remaining tasks if needed
+3. Update `02-architecture.md`:
+   - record new interfaces and decisions
+   - record any migration/rollout implications
+4. Update `03-implementation-notes.md`:
+   - what files/modules changed (high level)
+   - non-obvious decisions and rationale
+   - known issues and follow-ups
+5. Update `04-verification.md`:
+   - record what checks were run (commands)
+   - record outcomes (pass/fail + next actions)
+6. If status is `done` and verification is complete:
+   - propose moving `dev/active/<task-name>/` to `dev/archive/<task-name>/`
+   - obtain approval before moving
+
+## Verification
+- [ ] Task status is clearly documented (`planned | in-progress | blocked | done`)
+- [ ] Completed milestones are marked in the plan
+- [ ] Implementation notes capture what changed and why
+- [ ] Verification section records commands run and outcomes
+- [ ] Handoff docs are sufficient for another contributor to continue
+- [ ] No secrets or credentials in documentation
+- [ ] If archived: task moved to `dev/archive/` after approval
+
+## Boundaries
+- MUST NOT include secrets, credentials, or sensitive data in handoff docs
+- MUST NOT delete or overwrite previous decisions without explanation
+- MUST NOT mark tasks as complete without recording verification status
+- MUST obtain approval before moving/archiving directories
+- SHOULD NOT leave undocumented “tribal knowledge” that blocks the next contributor
+- SHOULD be specific about what works, what is broken, and what to do next
+
+## Included assets
+- Templates: `./templates/handoff-checklist.md`
+- Examples: `./examples/` includes a sample handoff update.
