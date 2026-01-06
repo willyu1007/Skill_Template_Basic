@@ -7,12 +7,12 @@ You are initializing a new project using the repository template.
 - You MUST follow a **3-stage, file-based** pipeline:
   - **Stage A**: write requirement docs under `init/stage-a-docs/` (DoD-driven).
   - **Stage B**: write a machine-readable blueprint at `init/project-blueprint.json`.
-  - **Stage C**: scaffold minimal structure + select skill packs by updating `.ai/skills/_meta/sync-manifest.json`, then run `node .ai/scripts/sync-skills.cjs`.
+  - **Stage C**: scaffold minimal structure + select skill packs by updating `.ai/skills/_meta/sync-manifest.json`, then run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
 - You MUST keep changes **verifiable**:
   - Each stage ends with a checklist and a command that verifies outputs.
 - You MUST NOT edit generated wrapper stubs directly:
   - Do not edit `.codex/skills/` or `.claude/skills/` by hand.
-  - Only edit SSOT in `.ai/skills/`, then run `node .ai/scripts/sync-skills.cjs`.
+  - Only edit SSOT in `.ai/skills/`, then run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
 
 ## Inputs you MUST collect from the user
 
@@ -106,8 +106,8 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 
 The apply command will:
 - create missing scaffold directories (no overwrites),
-- update `.ai/skills/_meta/sync-manifest.json` (collection: `current`),
-- run `node .ai/scripts/sync-skills.cjs` to regenerate wrappers.
+- update `.ai/skills/_meta/sync-manifest.json` (based on `skills.packs`),
+- run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes` to regenerate wrappers.
 
 If the user opts out of `agent_builder`, add:
 
@@ -141,7 +141,7 @@ Goal:
 Constraints (MUST / DON'T):
 - MUST output Stage A docs under `init/stage-a-docs/` during initialization.
 - MUST output blueprint at `init/project-blueprint.json` during initialization.
-- MUST update skills via `.ai/skills/_meta/sync-manifest.json` and run `node .ai/scripts/sync-skills.cjs`.
+- MUST update skills via `.ai/skills/_meta/sync-manifest.json` and run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
 - DON'T edit `.codex/skills/` or `.claude/skills/` directly.
 
 Acceptance criteria:

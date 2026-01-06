@@ -888,12 +888,25 @@ function updateManifest(repoRoot, blueprint, apply) {
   if (fs.existsSync(manifestPath)) {
     manifest = readJson(manifestPath);
   } else {
-    manifest = { version: 1, collections: { current: { includePrefixes: [], excludePrefixes: [], excludeSkillNames: [] } } };
+    manifest = { version: 1, includePrefixes: [], includeSkills: [], excludePrefixes: [], excludeSkills: [] };
   }
 
-  if (!manifest.collections) manifest.collections = {};
-  if (!manifest.collections.current) manifest.collections.current = {};
-  const current = manifest.collections.current;
+  // Normalize to the sync-skills.cjs manifest schema (top-level arrays).
+  // If older schemas exist, we migrate best-effort to keep sync deterministic.
+  const legacyCurrent = manifest && manifest.collections && manifest.collections.current ? manifest.collections.current : null;
+  if (!Array.isArray(manifest.includePrefixes) && legacyCurrent && Array.isArray(legacyCurrent.includePrefixes)) {
+    manifest.includePrefixes = legacyCurrent.includePrefixes;
+  }
+  if (!Array.isArray(manifest.excludePrefixes) && legacyCurrent && Array.isArray(legacyCurrent.excludePrefixes)) {
+    manifest.excludePrefixes = legacyCurrent.excludePrefixes;
+  }
+  if (!Array.isArray(manifest.excludeSkills) && legacyCurrent && Array.isArray(legacyCurrent.excludeSkillNames)) {
+    manifest.excludeSkills = legacyCurrent.excludeSkillNames;
+  }
+  if (!Array.isArray(manifest.includePrefixes)) manifest.includePrefixes = [];
+  if (!Array.isArray(manifest.includeSkills)) manifest.includeSkills = [];
+  if (!Array.isArray(manifest.excludePrefixes)) manifest.excludePrefixes = [];
+  if (!Array.isArray(manifest.excludeSkills)) manifest.excludeSkills = [];
 
   const packs = normalizePackList((blueprint.skills && blueprint.skills.packs) || []);
   const includePrefixes = [];
@@ -908,17 +921,20 @@ function updateManifest(repoRoot, blueprint, apply) {
     includePrefixes.push(pref);
   }
 
-  current.includePrefixes = uniq(includePrefixes);
+  manifest.includePrefixes = uniq(includePrefixes);
 
   // Optional excludes
   const skills = blueprint.skills || {};
-  if (Array.isArray(skills.excludePrefixes)) current.excludePrefixes = uniq(skills.excludePrefixes);
-  if (Array.isArray(skills.excludeSkillNames)) current.excludeSkillNames = uniq(skills.excludeSkillNames);
+  if (Array.isArray(skills.excludePrefixes)) manifest.excludePrefixes = uniq(skills.excludePrefixes);
+  const excludeSkills = Array.isArray(skills.excludeSkillNames)
+    ? skills.excludeSkillNames
+    : (Array.isArray(skills.excludeSkills) ? skills.excludeSkills : null);
+  if (excludeSkills) manifest.excludeSkills = uniq(excludeSkills);
 
-  if (!apply) return { op: 'write', path: manifestPath, mode: 'dry-run', warnings, includePrefixes: current.includePrefixes };
+  if (!apply) return { op: 'write', path: manifestPath, mode: 'dry-run', warnings, includePrefixes: manifest.includePrefixes };
 
   writeJson(manifestPath, manifest);
-  return { op: 'write', path: manifestPath, mode: 'applied', warnings, includePrefixes: current.includePrefixes };
+  return { op: 'write', path: manifestPath, mode: 'applied', warnings, includePrefixes: manifest.includePrefixes };
 }
 
 function syncWrappers(repoRoot, providers, apply) {
@@ -928,7 +944,7 @@ function syncWrappers(repoRoot, providers, apply) {
   }
   const providersArg = providers || 'both';
   const cmd = 'node';
-  const args = [scriptPath, '--scope', 'current', '--providers', providersArg];
+  const args = [scriptPath, '--scope', 'current', '--providers', providersArg, '--mode', 'reset', '--yes'];
 
   if (!apply) return { op: 'run', cmd: `${cmd} ${args.join(' ')}`, mode: 'dry-run' };
 

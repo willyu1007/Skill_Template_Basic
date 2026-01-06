@@ -52,6 +52,7 @@ function printHelp() {
     '    "version": 1,',
     '    "includePrefixes": ["workflows/", "backend/"],',
     '    "includeSkills": ["apply-backend-service-guidelines"],',
+    '    "excludePrefixes": ["workflows/agent/"],',
     '    "excludeSkills": ["experimental-skill"]',
     '  }',
     '',
@@ -87,6 +88,16 @@ function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
 
+function resolveSafeChildDir(rootDir, relPath) {
+  const absRoot = path.resolve(rootDir);
+  const absTarget = path.resolve(rootDir, String(relPath || ''));
+  const rel = path.relative(absRoot, absTarget);
+  if (!rel || rel === '.' || rel.startsWith('..') || path.isAbsolute(rel)) {
+    return null;
+  }
+  return absTarget;
+}
+
 function readJson(jsonPath) {
   try {
     const raw = fs.readFileSync(jsonPath, 'utf8');
@@ -106,17 +117,19 @@ function parseManifest(manifestPath) {
   const manifest = readJson(manifestPath);
   const includePrefixes = manifest.includePrefixes || manifest.prefixes || [];
   const includeSkills = manifest.includeSkills || manifest.skills || [];
-  const excludeSkills = manifest.excludeSkills || manifest.exclude || [];
+  const excludePrefixes = manifest.excludePrefixes || manifest.excludePrefix || [];
+  const excludeSkills = manifest.excludeSkills || manifest.excludeSkillNames || manifest.exclude || [];
 
-  if (!Array.isArray(includePrefixes) || !Array.isArray(includeSkills) || !Array.isArray(excludeSkills)) {
+  if (!Array.isArray(includePrefixes) || !Array.isArray(includeSkills) || !Array.isArray(excludePrefixes) || !Array.isArray(excludeSkills)) {
     console.error(colors.red(`Invalid manifest schema: ${manifestPath}`));
-    console.error(colors.red('Expected arrays: includePrefixes/includeSkills/excludeSkills'));
+    console.error(colors.red('Expected arrays: includePrefixes/includeSkills/excludePrefixes/excludeSkills'));
     process.exit(1);
   }
 
   return {
     includePrefixes: includePrefixes.map((p) => String(p)),
     includeSkills: includeSkills.map((s) => String(s)),
+    excludePrefixes: excludePrefixes.map((p) => String(p)),
     excludeSkills: excludeSkills.map((s) => String(s)),
   };
 }
@@ -397,6 +410,20 @@ function selectSkills(args, allSkills) {
       selected.set(found.name, found);
     }
 
+    for (const prefixRaw of manifest.excludePrefixes) {
+      const prefix = String(prefixRaw).replace(/\\/g, '/').replace(/^\/+/, '');
+      const normalized = prefix.endsWith('/') ? prefix : `${prefix}/`;
+      const toRemove = [];
+      for (const [name, s] of selected) {
+        if (s.relFromSkillsRoot === prefix || s.relFromSkillsRoot.startsWith(normalized)) {
+          toRemove.push(name);
+        }
+      }
+      for (const name of toRemove) {
+        selected.delete(name);
+      }
+    }
+
     for (const name of manifest.excludeSkills) {
       selected.delete(name);
     }
@@ -483,7 +510,11 @@ function deleteWrappers({ providers, skillNames, dryRun, allSkills }) {
     for (const nameOrPath of skillNames) {
       // Try to resolve name to path using allSkills, otherwise treat as path
       const targetRelPath = nameToPath.get(nameOrPath) || nameOrPath;
-      const targetDir = path.join(targetRoot, targetRelPath);
+      const targetDir = resolveSafeChildDir(targetRoot, targetRelPath);
+      if (!targetDir) {
+        console.error(colors.red(`Refusing to delete outside provider root: ${targetRelPath}`));
+        process.exit(1);
+      }
 
       if (!fs.existsSync(targetDir)) {
         console.log(colors.gray(`  [-] ${targetRelPath} (not present)`));

@@ -34,7 +34,7 @@ dev-docs/                  # Development documentation
 
 - Canonical skills live in `.ai/skills/`
 - `.codex/skills/` and `.claude/skills/` contain stubs that point back to SSOT
-- Refresh stubs with `node .ai/scripts/sync-skills.cjs --scope current --providers both`
+- Refresh stubs with `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`
 
 ## Documentation
 
@@ -42,6 +42,5 @@ dev-docs/                  # Development documentation
 - [Dev Docs Pattern](dev-docs/README.md)
 - [Documentation Guidelines](.ai/skills/standards/documentation-guidelines/SKILL.md)
 - [Naming Conventions](.ai/skills/standards/naming-conventions/SKILL.md)
-
 
 

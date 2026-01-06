@@ -68,8 +68,8 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 - Stage B produces **machine-readable SSOT** for automation: `init/project-blueprint.json`.
 - Stage C is deterministic:
   - scaffold directories based on `repo.layout` and enabled capabilities
-  - update `.ai/skills/_meta/sync-manifest.json` (collection: `current`)
-  - regenerate provider wrappers by running `node .ai/scripts/sync-skills.cjs`
+  - update `.ai/skills/_meta/sync-manifest.json` (based on `skills.packs`)
+  - regenerate provider wrappers by running `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`
 - The init kit is bootstrap-only. You may remove `init/` after success (guarded by `init/.init-kit`).
 
 ### 1. Definitions

@@ -29,9 +29,10 @@ python scripts/land_skills.py --repo-root . --source /path/to/bundle.zip --plan
 python scripts/land_skills.py --repo-root . --source /path/to/bundle.zip --apply --overwrite=changed --backup
 ```
 
-#### 2) Sync SSOT to provider roots
+#### 2) Sync SSOT to provider stubs (recommended)
 ```bash
-python scripts/land_skills.py --repo-root . --sync codex,claude --apply
+# Run from repo root.
+node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes
 ```
 
 #### 3) Verify only
@@ -44,9 +45,9 @@ You can provide `--config templates/landing-config.example.json` and adjust as n
 
 Config fields (high level):
 - `ssot_dir`: where to install the SSOT inside the repo (default `.ai/skills`)
-- `provider_roots`: mapping of names to paths and behavior
 - `ignore`: patterns to ignore during copy
-- `prune`: default prune behavior
+- `default_overwrite`: default overwrite mode (`never` | `changed` | `always`)
+- `default_prune`: default prune behavior
 - `backup_dir`: where backups are stored (default `.ai/.backups/skills-landing/<timestamp>`)
 
 ## Safety model

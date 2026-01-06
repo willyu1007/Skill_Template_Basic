@@ -51,7 +51,7 @@ Optional inputs:
 - Stage C scaffold (directories only; no framework code):
   - `src/` or (`apps/`, `packages/`) depending on `repo.layout`
 - Skills enabled (SSOT):
-  - `.ai/skills/_meta/sync-manifest.json` updated (collection: `current`)
+  - `.ai/skills/_meta/sync-manifest.json` updated (based on `skills.packs`)
 - Provider wrappers regenerated:
   - via `node .ai/scripts/sync-skills.cjs`
 
@@ -185,7 +185,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 
 - Do not invent requirements. Resolve ambiguity with the user, or record the item as TBD in `init/stage-a-docs/risk-open-questions.md`.
 - Do not add provider-specific assumptions into Stage A docs or the blueprint.
-- Do not edit `.codex/skills/` or `.claude/skills/` directly. Only update SSOT in `.ai/skills/` and run `node .ai/scripts/sync-skills.cjs`. (The repo's SSOT rule applies.) 
+- Do not edit `.codex/skills/` or `.claude/skills/` directly. Only update SSOT in `.ai/skills/` and run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`. (The repo's SSOT rule applies.) 
 - Scaffolding MUST NOT overwrite existing files; scaffolding should only create missing directories and small placeholder `README.md` files.
 - **Exception**: The root `README.md` will be replaced with a project-specific version generated from the blueprint. This is intentional—the template README should be replaced with project documentation.
 
