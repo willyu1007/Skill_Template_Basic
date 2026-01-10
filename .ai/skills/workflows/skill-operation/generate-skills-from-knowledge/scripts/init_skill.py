@@ -3,10 +3,10 @@
 init_skill.py - Initialize a new skill directory with compliant skeleton files.
 
 Usage:
-    python init_skill.py <skill-name> --path <target-directory>
+    python3 init_skill.py <skill-name> --path <target-directory>
 
 Example:
-    python init_skill.py my-new-skill --path .ai/skills/workflows/common
+    python3 init_skill.py my-new-skill --path .ai/skills/workflows/common
 
 This script creates a skill directory with:
 - SKILL.md (with valid YAML frontmatter, required sections)

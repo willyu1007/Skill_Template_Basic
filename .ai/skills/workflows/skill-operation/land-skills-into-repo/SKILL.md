@@ -50,7 +50,7 @@ The script always produces a plan/report to stdout; it can also emit JSON via `-
 From the directory that contains the `SKILL.md` (the "skill root"), run:
 
 ```bash
-python ./scripts/land_skills.py \
+python3 ./scripts/land_skills.py \
   --repo-root /path/to/repo \
   --source /path/to/skills-bundle.zip \
   --plan
@@ -64,7 +64,7 @@ Rules:
 After reviewing the plan output, apply changes:
 
 ```bash
-python ./scripts/land_skills.py \
+python3 ./scripts/land_skills.py \
   --repo-root /path/to/repo \
   --source /path/to/skills-bundle.zip \
   --apply \
@@ -80,7 +80,7 @@ Recommended defaults:
 Run verification after applying:
 
 ```bash
-python ./scripts/land_skills.py \
+python3 ./scripts/land_skills.py \
   --repo-root /path/to/repo \
   --verify
 ```

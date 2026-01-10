@@ -19,14 +19,14 @@ Common provider roots (examples; configurable):
 Run from the skill root:
 
 ```bash
-python scripts/land_skills.py --help
+python3 scripts/land_skills.py --help
 ```
 
 ### Typical flows
 #### 1) Install bundle into SSOT
 ```bash
-python scripts/land_skills.py --repo-root . --source /path/to/bundle.zip --plan
-python scripts/land_skills.py --repo-root . --source /path/to/bundle.zip --apply --overwrite=changed --backup
+python3 scripts/land_skills.py --repo-root . --source /path/to/bundle.zip --plan
+python3 scripts/land_skills.py --repo-root . --source /path/to/bundle.zip --apply --overwrite=changed --backup
 ```
 
 #### 2) Sync SSOT to provider stubs (recommended)
@@ -37,7 +37,7 @@ node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset -
 
 #### 3) Verify only
 ```bash
-python scripts/land_skills.py --repo-root . --verify
+python3 scripts/land_skills.py --repo-root . --verify
 ```
 
 ## Config file

@@ -117,7 +117,7 @@ Type "approve B" to proceed to scaffolding.
    - Write `prompts/developer.md` with internal instructions
 
 3. **Expand Tests**: For each scenario in `acceptance.scenarios[]`:
-   - Write test case in `tests/acceptance.test.js`
+   - Add/extend tests under `tests/` (scaffold includes `tests/smoke.test.js`)
    - Include given/when/then structure
    - Include expected_output_checks as assertions
 

@@ -17,6 +17,7 @@
  *   - validate-blueprint
  *   - plan
  *   - apply
+ *   - verify
  *   - finish
  *
  * Notes:
@@ -63,6 +64,7 @@ Commands:
   verify
     --workdir <path>             Workdir path
     --repo-root <path>           Repo root (default: cwd)
+    --skip-http                  Skip HTTP server-based scenarios (for sandbox/CI)
     --format <text|json>          Output format (default: text)
 
   finish
