@@ -10,6 +10,8 @@ You are initializing a new project using the repository template.
   - **Stage C**: scaffold minimal structure + select skill packs by updating `.ai/skills/_meta/sync-manifest.json`, then run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
 - You MUST keep changes **verifiable**:
   - Each stage ends with a checklist and a command that verifies outputs.
+- You MUST NOT create dev-docs task bundles during initialization:
+  - Use the 3-stage init pipeline only; dev-docs workflows apply after init is complete.
 - You MUST NOT edit generated wrapper stubs directly:
   - Do not edit `.codex/skills/` or `.claude/skills/` by hand.
   - Only edit SSOT in `.ai/skills/`, then run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
@@ -29,6 +31,7 @@ Minimum required inputs:
 - repo layout intent (`single` vs `monorepo`)
 - quality expectations (testing/CI/devops)
 - whether to keep the heavy `agent_builder` workflow skill (if not needed, prune it after init)
+- post-init skill retention preferences (if known; otherwise decide after Stage C)
 
 If the user cannot decide, you MUST record TBD items in `init/stage-a-docs/risk-open-questions.md` (owner + options + decision due).
 
@@ -115,6 +118,13 @@ If the user opts out of `agent_builder`, add:
 --skip-agent-builder --i-understand
 ```
 
+### Troubleshooting: EPERM writing `.codex/skills`
+
+If Stage C `apply` fails with `EPERM` for `.codex/skills/`:
+- Cause: sandboxed filesystem denies writes to `.codex/skills/` during stub regeneration.
+- Fix: rerun the same `apply` command with escalated filesystem permissions (no blueprint changes).
+- DON'T: do NOT modify the blueprint to work around permission errors.
+
 ### Optional: prune agent builder after init
 
 If the user decides to remove `agent_builder` after initialization is complete, run:
@@ -124,6 +134,8 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 ```
 
 The prune-agent-builder command will remove `.ai/skills/workflows/agent` and re-sync wrappers.
+
+If you plan to prune multiple skills post-init, you MAY delete `agent_builder` via the post-init skill pruning step instead of running this command.
 
 ### Optional: remove init kit after success
 
@@ -143,6 +155,7 @@ Constraints (MUST / DON'T):
 - MUST output blueprint at `init/project-blueprint.json` during initialization.
 - MUST update skills via `.ai/skills/_meta/sync-manifest.json` and run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
 - DON'T edit `.codex/skills/` or `.claude/skills/` directly.
+- DON'T create dev-docs task bundles during initialization (use dev-docs only after init is complete).
 
 Acceptance criteria:
 - Stage A passes `check-docs` (strict if required).
@@ -150,6 +163,94 @@ Acceptance criteria:
 - Stage C wrappers regenerated and match selected packs.
 
 ---
+
+## Post-init: Skill Retention and Pruning
+
+After Stage C completes, decide which skills to keep and prune the rest.
+
+### When to ask
+
+At the Stage C completion checkpoint, before updating root `README.md` and `AGENTS.md`.
+
+### Retention table (required)
+
+Generate a structured, readable table of all current skills from `.ai/skills/`. Start from `init/skills/initialize-project-from-requirements/templates/skill-retention-table.template.md`, and use separate tables for `workflows/` and `standards/` to keep it scannable. Keep the table in-chat only; do NOT save `skill-retention-table.md` as a file.
+
+Table columns:
+
+| Skill | Description |
+|-------|-------------|
+
+Rules:
+- Translate descriptions to the user's preferred language if needed.
+- Remind the user they can list skills to delete directly based on the table.
+
+### Apply changes (after confirmation)
+
+1. Ask the user to list the skills to remove (by name or path).
+2. Dry run the deletion:
+
+```bash
+node .ai/scripts/delete-skills.cjs --skills "skill-a,skill-b" --dry-run
+```
+
+3. Confirm with the user, then re-run with `--yes` (optionally `--clean-empty`).
+4. Expected result: the script reports deletions under `.ai/skills/`, `.codex/skills/`, and `.claude/skills/`.
+
+### If the user cannot decide
+
+Record TBD items in `init/stage-a-docs/risk-open-questions.md` (owner + options + decision due).
+
+### Notes
+
+- `delete-skills.cjs` is an alias of `delete-skill.cjs` and accepts the same flags (`--skill`, `--skills`, `--scope`).
+- Deletions are destructive; use `--dry-run` first and keep a git rollback plan.
+- Re-running is safe: already-removed skills are skipped.
+
+## Post-init: Update Root README.md
+
+After Stage C and skill pruning (if any), ask the user if they want to update the root `README.md` with project-specific info.
+
+### When to ask
+
+At the Stage C completion checkpoint, after skill pruning.
+
+### What to preserve
+
+The root `README.md` contains template navigation that SHOULD be kept:
+
+| Section | Keep? | Reason |
+|---------|-------|--------|
+| Quick Start table | YES | Onboarding entry points |
+| Skill Entry Points | YES | SSOT location + sync command |
+| Documentation links | YES | LLM/human navigation |
+
+### What to add or update
+
+From `init/project-blueprint.json` and the scaffolded layout:
+
+| Add/Update | Source | Example |
+|------------|--------|---------|
+| Title + description | `project.name`, `project.description` | "my-app - E-commerce platform" |
+| Tech Stack table | `repo.language`, `repo.packageManager`, frameworks | TS, pnpm, React, Express |
+| Repo layout tree | scaffolded directories | `apps/`, `packages/`, `src/` |
+
+### How to update
+
+1. Read current root `README.md`.
+2. Replace the template title/description with project values.
+3. Update the Quick Start table to point to current entry points (remove `init/` references if init kit is removed).
+4. Update the "What's Inside" tree with the scaffolded directories.
+5. Add or refresh a Tech Stack table if missing.
+6. Preserve remaining sections unless the user requests removal.
+7. Show a diff to the user before writing.
+
+### Format and safety
+
+- Use tables for stack and quick start.
+- Wrap paths/commands in backticks.
+- Blast radius: `README.md` only.
+- Idempotency: re-running is safe if you review the diff.
 
 ## Post-init: Update Root AGENTS.md
 

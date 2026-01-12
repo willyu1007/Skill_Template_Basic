@@ -205,6 +205,14 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 
 ---
 
+## Post-init: Skill Retention and Pruning (optional)
+
+After Stage C, you MAY prune unneeded skills using a retention table.
+
+- Start from `templates/skill-retention-table.template.md` and fill the Skill + Description columns in-chat (translate to the user's preferred language if needed). Do NOT save `skill-retention-table.md` as a file.
+- Ask the user to list skills to remove (name or path), then confirm before deleting.
+- Use `node .ai/scripts/delete-skills.cjs --skills "<csv>" --dry-run`, then re-run with `--yes`.
+
 ## Post-init: Update AGENTS.md
 
 After Stage C completion, if the user chooses to update the root `AGENTS.md`, follow these rules.
@@ -290,6 +298,7 @@ After Stage C completion, if the user chooses to update the root `AGENTS.md`, fo
 - `templates/non-functional-requirements.template.md` - Stage A NFR doc template
 - `templates/domain-glossary.template.md` - Stage A glossary template
 - `templates/risk-open-questions.template.md` - Stage A risks template
+- `templates/skill-retention-table.template.md` - Post-init skill retention table (NEW)
 - `templates/project-blueprint.example.json` - Stage B blueprint example
 - `templates/project-blueprint.schema.json` - Stage B blueprint JSON schema
 - `templates/init-state.schema.json` - State tracking schema (NEW)
