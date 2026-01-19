@@ -74,7 +74,7 @@ After Stage C scaffolds the agent module, Stage D fills in the actual implementa
 
 ## Tool Registration
 
-Tools are registered in `src/core/tools.js` via the `toolImplementations` object:
+Tools are registered in `src/core/tools.mjs` via the `toolImplementations` object:
 
 ```javascript
 const { toolImplementations } = require('./tools');
@@ -107,7 +107,7 @@ toolImplementations['my_tool'] = async (input, context) => {
 
 ### Tools
 - [ ] Each tool in `blueprint.tools.tools[]` has implementation
-- [ ] Tool implementations are registered in `src/core/tools.js` via `toolImplementations` registry
+- [ ] Tool implementations are registered in `src/core/tools.mjs` via `toolImplementations` registry
 - [ ] Retry logic for tools with `max_attempts > 1`
 - [ ] Audit logging for tools with `audit.required`
 - [ ] Tool loop `maxSteps` configured if needed (env: `AGENT_TOOLS_MAX_STEPS`, default: 5)
@@ -124,11 +124,10 @@ toolImplementations['my_tool'] = async (input, context) => {
 
 ### Integration
 - [ ] `.env.example` includes all required env vars
-- [ ] `package.json` has correct entry points
 - [ ] README updated with run instructions
 
 ### Custom Storage (if using kv_store/database)
-- [ ] Custom store adapter implemented in `src/core/conversation.js`
+- [ ] Custom store adapter implemented in `src/core/conversation.mjs`
 - [ ] Store adapter follows `InMemoryStore`/`FileStore` interface (get/set/delete methods)
 - [ ] TTL and max_items eviction implemented if required
 

@@ -27,7 +27,7 @@ Integrate a new provider **behind a single calling surface** (adapter/gateway/cl
    - Use `credential_ref` (non-secret pointer to your secrets manager).
    - If new env/config keys are introduced:
      - Register them in: `.ai/llm-config/registry/config_keys.yaml`
-     - Run: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+     - Run: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 
 4) **Implement/extend the provider adapter (repo-specific)**
    - The adapter must:
@@ -59,7 +59,7 @@ Integrate a new provider **behind a single calling surface** (adapter/gateway/cl
 - Adapter implementation + tests + telemetry
 
 ## Required verification
-- `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs` (if any new key)
+- `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs` (if any new key)
 - Repo tests for the adapter layer (minimum: contract tests)
 
 ## Optional deep references

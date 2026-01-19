@@ -13,12 +13,12 @@ Before applying Stage C, review `init/project-blueprint.json`:
 ## Validate
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs validate   --blueprint init/project-blueprint.json
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs validate   --blueprint init/project-blueprint.json
 ```
 
 ## Reconcile packs (recommended)
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs suggest-packs   --blueprint init/project-blueprint.json   --repo-root .
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs suggest-packs   --blueprint init/project-blueprint.json   --repo-root .
 ```
 

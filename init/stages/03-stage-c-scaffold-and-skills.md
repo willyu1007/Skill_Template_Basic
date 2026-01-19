@@ -23,26 +23,26 @@ Create a minimal scaffold and enable the right skill packs, then sync provider w
 
 ```bash
 # Dry-run scaffold
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs scaffold
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs scaffold
 
 # Apply scaffold + manifest + wrappers
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs apply --providers both
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both
 
 # Apply without agent_builder
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs apply --providers both --skip-agent-builder --i-understand
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both --skip-agent-builder --i-understand
 
 # Approve and complete initialization
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage C
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage C
 ```
 
 ## Post-init options
 
 ```bash
 # Prune agent_builder after init (if decided later)
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs prune-agent-builder --apply --i-understand
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder --apply --i-understand
 
 # Cleanup init kit (optionally archive first)
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs cleanup-init --apply --i-understand --archive
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --apply --i-understand --archive
 ```
 
 ## See also

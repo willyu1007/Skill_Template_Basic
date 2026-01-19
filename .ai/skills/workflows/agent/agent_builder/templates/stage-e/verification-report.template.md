@@ -46,7 +46,7 @@
 
 ## Verification Notes
 
-- This report was generated automatically by `agent-builder.js verify`
+- This report was generated automatically by `agent-builder.mjs verify`
 - Structural verification checks agent module layout and configuration
 - Runtime verification requires the agent to be deployed and running
 
@@ -57,12 +57,12 @@
 
 Review the failed checks above and:
 1. Fix the underlying issues in the agent implementation
-2. Re-run verification: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js verify --workdir <WORKDIR>`
+2. Re-run verification: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs verify --workdir <WORKDIR>`
 {{else}}
 ### All Checks Passed
 
 The agent is ready for:
-1. Cleanup: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js finish --workdir <WORKDIR> --apply`
+1. Cleanup: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs finish --workdir <WORKDIR> --apply`
 2. Deployment to target environment
 3. Runtime acceptance testing
 {{/if}}

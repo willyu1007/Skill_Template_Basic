@@ -27,11 +27,11 @@ Each scenario in `acceptance.scenarios[]` becomes a test case.
 **Example Test** (using Node.js built-in test runner):
 
 ```javascript
-// tests/smoke.test.js
+// tests/smoke.test.mjs
 
-const { test, describe, before, after } = require('node:test');
-const assert = require('node:assert');
-const { runAgent } = require('../src/core/run');
+import { test, describe, before, after } from 'node:test';
+import assert from 'node:assert';
+import { runAgent } from '../src/core/run.mjs';
 
 describe('Acceptance Scenarios', () => {
 
@@ -114,14 +114,14 @@ describe('Acceptance Scenarios', () => {
 
 ```
 tests/
-├── smoke.test.js         # Minimal scaffold; extend it for acceptance coverage
+├── smoke.test.mjs         # Minimal scaffold; extend it for acceptance coverage
 ├── unit/
-│   ├── tools.test.js     # Tool unit tests
-│   ├── prompts.test.js   # Prompt loading tests
-│   └── conversation.test.js  # Memory tests
+│   ├── tools.test.mjs     # Tool unit tests
+│   ├── prompts.test.mjs   # Prompt loading tests
+│   └── conversation.test.mjs  # Memory tests
 ├── integration/
-│   ├── http.test.js      # HTTP adapter tests
-│   └── worker.test.js    # Worker adapter tests
+│   ├── http.test.mjs      # HTTP adapter tests
+│   └── worker.test.mjs    # Worker adapter tests
 └── fixtures/
     ├── requests/         # Sample request JSONs
     └── responses/        # Expected response JSONs
@@ -134,8 +134,8 @@ tests/
 ### LLM Mock
 
 ```javascript
-// tests/mocks/llm.js
-function createMockLLM(responses) {
+// tests/mocks/llm.mjs
+export function createMockLLM(responses) {
   let callIndex = 0;
   return {
     complete: async ({ messages }) => {
@@ -164,8 +164,8 @@ function createMockLLM(responses) {
 ### Tool Mock
 
 ```javascript
-// tests/mocks/tools.js
-function createMockTools(toolResponses) {
+// tests/mocks/tools.mjs
+export function createMockTools(toolResponses) {
   return {
     executeTool: async ({ toolId, input }) => {
       if (toolResponses[toolId]) {
@@ -189,7 +189,7 @@ function createMockTools(toolResponses) {
 node --test tests/
 
 # Run smoke test only (scaffold)
-node --test tests/smoke.test.js
+node --test tests/smoke.test.mjs
 
 # Run with coverage (Node 20+)
 node --test --experimental-test-coverage tests/

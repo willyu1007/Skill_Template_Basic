@@ -51,9 +51,9 @@ When a blueprint is applied, `agent_builder` generates:
 
 ---
 
-## 4) Helper Tool: `scripts/agent-builder.js`
+## 4) Helper Tool: `scripts/agent-builder.mjs`
 
-Path: `.ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js`
+Path: `.ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs`
 
 This script is dependency-free (Node.js only).
 
@@ -75,23 +75,23 @@ This script is dependency-free (Node.js only).
 
 ```bash
 # Start a new run
-node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js start
+node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs start
 
 # Approve Stage A
-node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js approve --workdir <WORKDIR> --stage A
+node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs approve --workdir <WORKDIR> --stage A
 
 # Validate and approve Stage B
-node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js validate-blueprint --workdir <WORKDIR>
-node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js approve --workdir <WORKDIR> --stage B
+node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs validate-blueprint --workdir <WORKDIR>
+node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs approve --workdir <WORKDIR> --stage B
 
 # Apply scaffold
-node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js apply --workdir <WORKDIR> --repo-root . --apply
+node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs apply --workdir <WORKDIR> --repo-root . --apply
 
 # Verify acceptance scenarios
-node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js verify --workdir <WORKDIR> --repo-root .
+node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs verify --workdir <WORKDIR> --repo-root .
 
 # Cleanup (--apply required to actually delete)
-node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js finish --workdir <WORKDIR> --apply
+node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs finish --workdir <WORKDIR> --apply
 ```
 
 ---

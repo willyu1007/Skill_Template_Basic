@@ -31,7 +31,7 @@ The blueprint defines tools in `tools.tools[]`. Each tool has:
 3. Implement the function following the pattern for `kind`
 4. Add retry logic if `retry.max_attempts > 1`
 5. Add audit logging if `audit.required`
-6. Register in `tools.js` exports
+6. Register in `tools.mjs` exports
 
 ---
 
@@ -40,7 +40,7 @@ The blueprint defines tools in `tools.tools[]`. Each tool has:
 ### 2.1 HTTP API Tool
 
 ```javascript
-// src/core/tools.js
+// src/core/tools.mjs
 
 const { agentError } = require('./errors');
 
@@ -275,7 +275,7 @@ function calculateDelay(attempt, backoff) {
 
 ## 4. Registering Tools
 
-Update `src/core/tools.js` to export all implementations:
+Update `src/core/tools.mjs` to export all implementations:
 
 ```javascript
 const toolImplementations = {

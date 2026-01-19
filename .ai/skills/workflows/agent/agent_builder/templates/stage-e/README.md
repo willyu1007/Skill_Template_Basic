@@ -15,5 +15,5 @@ See `verification-evidence.schema.json` for the JSON schema of the evidence file
 
 ## Usage
 
-These templates are used by the `agent-builder.js verify` command to generate verification evidence. They are also copied to the agent's `doc/` directory for project documentation.
+These templates are used by the `agent-builder.mjs verify` command to generate verification evidence. They are also copied to the agent's `doc/` directory for project documentation.
 

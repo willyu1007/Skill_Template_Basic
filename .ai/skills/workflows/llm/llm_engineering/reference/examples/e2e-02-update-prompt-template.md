@@ -53,9 +53,9 @@ You need to change a production prompt without breaking callers, and you want pr
 Run from repo root:
 
 - Registry sanity (recommended):
-  - `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.cjs`
+  - `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.mjs`
 - Config key gate (only if new in-scope keys were introduced):
-  - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+  - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 - Run the smallest prompt regression suite available.
 
 ## Expected outputs

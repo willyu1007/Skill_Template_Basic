@@ -17,6 +17,7 @@ Example guide only. Prefer the project's own README/scripts when available.
   - JavaScript stack traces
   - bundling errors
   - some runtime logs
+- If this terminal is IDE-integrated, prefer auto-collection (reply `DONE` after repro; see `examples/ide-terminal-hook.md`).
 
 If the project has a custom script, use that rather than guessing the command.
 

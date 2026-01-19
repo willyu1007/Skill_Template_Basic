@@ -54,7 +54,7 @@ Create (or refactor) a **single calling surface** for LLM usage so feature code 
 ## Required verification
 - If new config/env keys are introduced:
   - update `.ai/llm-config/registry/config_keys.yaml`
-  - run `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+  - run `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 - Run the smallest relevant test suite for the wrapper layer
 
 ## Optional deep references

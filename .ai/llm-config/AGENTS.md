@@ -30,7 +30,7 @@ These files are the **single source of truth** for stable identifiers and allowe
    - Never introduce new LLM env/config keys ad-hoc.
    - Register first in `.ai/llm-config/registry/config_keys.yaml`.
    - Verify:
-     - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+     - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 
 2) **No secrets in repo**
    - Store only non-secret references (e.g., `credential_ref`).

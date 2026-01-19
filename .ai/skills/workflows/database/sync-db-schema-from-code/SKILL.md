@@ -26,7 +26,7 @@ This skill MUST be used only when the project DB SSOT is `repo-prisma`:
 To check the mode, read:
 
 - `docs/project/db-ssot.json`
-- Or run: `node .ai/scripts/dbssotctl.js status`
+- Or run: `node .ai/scripts/dbssotctl.mjs status`
 
 ## When to use
 
@@ -139,7 +139,7 @@ Record evidence in `04-post-verify.md`.
 
 13. Refresh LLM DB context contract:
 
-- `node .ai/scripts/dbssotctl.js sync-to-context`
+- `node .ai/scripts/dbssotctl.mjs sync-to-context`
 
 (If context-awareness is enabled, the command also runs `contextctl touch` best-effort.)
 

@@ -50,7 +50,7 @@ Register any new configuration keys (if required) in:
 Then run:
 
 ```bash
-node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs
+node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs
 ```
 
 ### 3) Implement a provider adapter

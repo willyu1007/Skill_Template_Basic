@@ -20,25 +20,25 @@ Ask your LLM to follow `init/AGENTS.md`.
 
 ```bash
 # 1. Initialize templates and state
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs start
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs start
 
 # 2. Edit Stage A docs, then validate
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs check-docs
 
 # 3. Approve Stage A
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage A
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage A
 
 # 4. Edit blueprint, then validate
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs validate
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs validate
 
 # 5. Approve Stage B
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage B
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage B
 
 # 6. Apply scaffold and wrappers
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs apply --providers both
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both
 
 # 7. Complete initialization
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage C
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage C
 ```
 
 ## Documentation
@@ -54,10 +54,10 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 
 ```bash
 # Optional: remove agent_builder if not needed
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs prune-agent-builder --apply --i-understand
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder --apply --i-understand
 
 # Optional: archive and remove init kit
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs cleanup-init --apply --i-understand --archive
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --apply --i-understand --archive
 ```
 
 ## Reference
@@ -69,7 +69,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 - Stage C is deterministic:
   - scaffold directories based on `repo.layout` and enabled capabilities
   - update `.ai/skills/_meta/sync-manifest.json` (based on `skills.packs`)
-  - regenerate provider wrappers by running `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`
+  - regenerate provider wrappers by running `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
 - The init kit is bootstrap-only. You may remove `init/` after success (guarded by `init/.init-kit`).
 
 ### 1. Definitions
@@ -85,7 +85,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 Initialize state file and create template files.
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs start --repo-root .
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs start --repo-root .
 ```
 
 Creates:
@@ -98,7 +98,7 @@ Creates:
 Show current initialization progress.
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs status --repo-root .
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs status --repo-root .
 ```
 
 #### 2.3 `check-docs`
@@ -107,10 +107,10 @@ Validate Stage A documents.
 
 ```bash
 # Normal mode
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs check-docs
 
 # Strict mode (treats warnings as errors)
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs --strict
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs check-docs --strict
 ```
 
 #### 2.4 `validate`
@@ -118,7 +118,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 Validate Stage B blueprint.
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs validate
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs validate
 ```
 
 #### 2.5 `suggest-packs`
@@ -127,10 +127,10 @@ Recommend skill packs based on blueprint capabilities.
 
 ```bash
 # Warn-only (default)
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs suggest-packs
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs suggest-packs
 
 # Auto-add missing recommended packs
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs suggest-packs --write
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs suggest-packs --write
 ```
 
 #### 2.6 `approve`
@@ -138,9 +138,9 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 Approve current stage and advance to next stage.
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage A
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage B
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage C
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage A
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage B
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage C
 ```
 
 #### 2.7 `scaffold`
@@ -148,7 +148,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 Dry-run scaffold plan.
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs scaffold
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs scaffold
 ```
 
 #### 2.8 `apply`
@@ -157,10 +157,10 @@ Apply scaffold + manifest update + wrapper sync.
 
 ```bash
 # Standard apply
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs apply --providers both
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both
 
 # With agent_builder removal
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs apply --providers both --skip-agent-builder --i-understand
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both --skip-agent-builder --i-understand
 ```
 
 #### 2.9 `prune-agent-builder`
@@ -168,7 +168,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 Remove `.ai/skills/workflows/agent` after initialization.
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs prune-agent-builder --apply --i-understand
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder --apply --i-understand
 ```
 
 #### 2.10 `cleanup-init`
@@ -177,10 +177,10 @@ Remove the init kit (optionally archive to `docs/project/` first).
 
 ```bash
 # Dry-run
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs cleanup-init --i-understand
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --i-understand
 
 # Apply with archive
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs cleanup-init --apply --i-understand --archive
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --apply --i-understand --archive
 ```
 
 ### 3. Stage A validation details

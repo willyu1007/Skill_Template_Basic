@@ -176,5 +176,5 @@ Use the following mapping to avoid "knowledge floating in chat":
 - After the interview, run Stage A validation:
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs --docs-root init/stage-a-docs
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs check-docs --docs-root init/stage-a-docs
 ```

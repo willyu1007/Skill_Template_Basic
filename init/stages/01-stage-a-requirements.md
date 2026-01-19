@@ -36,10 +36,10 @@ Produce a verifiable set of requirement documents under `init/stage-a-docs/`.
 
 ```bash
 # Validate docs
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs check-docs
 
 # Approve and advance to Stage B
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage A
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage A
 ```
 
 ## See also

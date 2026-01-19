@@ -9,7 +9,7 @@ Human operator or LLM running `agent_builder` for a real feature request.
 ## How to use
 1) Capture decisions in temporary Stage A notes under `stage-a/interview-notes.md` and `stage-a/integration-decision.md`.
 2) Encode decisions in `stage-b/agent-blueprint.json` (schema: `templates/agent-blueprint.schema.json`).
-3) Validate with `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js validate-blueprint --workdir <WORKDIR>`.
+3) Validate with `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs validate-blueprint --workdir <WORKDIR>`.
 
 ## Decision Inventory
 

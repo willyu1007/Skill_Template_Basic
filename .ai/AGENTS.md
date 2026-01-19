@@ -12,6 +12,7 @@
 - **SSOT**: edit skills only under `.ai/skills/`.
 - **Generated stubs**: do not edit `.codex/skills/` or `.claude/skills/` directly. Regenerate via sync.
 - **Progressive disclosure**: do not recursively enumerate `.ai/` to "discover" content.
+- **ESM (.mjs)**: all scripts in this repo use ES Modules with `.mjs` extension. Use `import`/`export` syntax, not `require()`.
 
 ## Routing
 
@@ -21,11 +22,11 @@
 - If the task is **skill authoring/maintenance**:
   - Open: `.ai/skills/standards/documentation-guidelines/SKILL.md`
   - Run:
-    - `node .ai/scripts/lint-skills.cjs --strict`
-    - `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`
+    - `node .ai/scripts/lint-skills.mjs --strict`
+    - `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
 - If the user asks to **sync skill stubs** (sync skills / sync stubs):
   - Use the repo selection in `.ai/skills/_meta/sync-manifest.json` via `--scope current`
-  - Run: `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`
+  - Run: `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
 - If the task is **dev-docs task documentation** (long-running work, handoff, context recovery):
   - Open: `dev-docs/AGENTS.md`
   - Use workflows: `create-dev-docs-plan`, `update-dev-docs-for-handoff`
@@ -41,8 +42,8 @@ AI/LLM MUST NOT:
 
 ## Verification (repo maintenance)
 
-- Lint skills: `node .ai/scripts/lint-skills.cjs --strict`
-- Sync stubs: `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`
-- Delete skills: `node .ai/scripts/delete-skills.cjs --skill <name|path> --yes`
-- LLM config key gate: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
-- LLM registry sanity: `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.cjs`
+- Lint skills: `node .ai/scripts/lint-skills.mjs --strict`
+- Sync stubs: `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
+- Delete skills: `node .ai/scripts/delete-skills.mjs --skill <name|path> --yes`
+- LLM config key gate: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
+- LLM registry sanity: `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.mjs`

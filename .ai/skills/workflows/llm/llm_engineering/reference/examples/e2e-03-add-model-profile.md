@@ -52,9 +52,9 @@ You want feature code to request a **business intent** (profile) instead of a ha
 Run from repo root:
 
 - Registry sanity (recommended):
-  - `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.cjs`
+  - `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.mjs`
 - Config key gate (only if new in-scope keys were introduced):
-  - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+  - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 - Run wrapper routing tests.
 
 ## Expected outputs

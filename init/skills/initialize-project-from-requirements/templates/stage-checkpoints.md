@@ -50,7 +50,7 @@ If you need changes, tell me what to adjust.
 - If user requests changes, iterate until approved
 - Once user approves, run:
   ```bash
-  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage A
+  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage A
   ```
 
 ---
@@ -107,7 +107,7 @@ If you need changes, tell me what to adjust.
 - Show pack suggestions and let the user decide
 - Once user approves, run:
   ```bash
-  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage B
+  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage B
   ```
 
 ---
@@ -148,7 +148,7 @@ Initialization is complete.
 
 1. **Update AGENTS.md (recommended)**: Record project type and tech stack in root `AGENTS.md`
 2. Archive docs (optional): to keep Stage A docs and blueprint in `docs/project/`, run:
-   node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs cleanup-init --repo-root . --apply --i-understand --archive
+   node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --repo-root . --apply --i-understand --archive
 3. Cleanup init (optional): removes the initialization kit after archiving
 4. Start development: you can now use the enabled skills
 
@@ -174,7 +174,7 @@ Reply with one of:
   5. Show diff to user before applying
 - Once user confirms, run:
   ```bash
-  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage C
+  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage C
   ```
 - Only run cleanup-init if the user explicitly requests it
 

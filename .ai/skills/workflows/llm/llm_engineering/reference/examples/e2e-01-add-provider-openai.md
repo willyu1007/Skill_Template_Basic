@@ -66,9 +66,9 @@ You need to integrate a new LLM provider behind a single calling surface, using 
 Run from repo root:
 
 - Registry sanity (recommended):
-  - `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.cjs`
+  - `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.mjs`
 - Config key gate (required if any new in-scope key was introduced):
-  - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+  - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 - Run the smallest adapter/wrapper test suite available in your repo.
 
 ## Expected outputs

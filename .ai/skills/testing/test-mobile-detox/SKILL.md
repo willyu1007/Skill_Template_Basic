@@ -50,9 +50,9 @@ description: Detox mobile E2E automation for React Native: bootstrap, author flo
 ## Verification
 - If you changed **skills**:
   - Prefer host-repo tooling if present:
-    - `node .ai/scripts/lint-skills.cjs --strict`
+    - `node .ai/scripts/lint-skills.mjs --strict`
   - Always run the local validator:
-    - `node .ai/skills/testing/test-mobile-detox/scripts/validate-skill.cjs`
+    - `node .ai/skills/testing/test-mobile-detox/scripts/validate-skill.mjs`
 
 - If you changed **tests/config**:
   - `npx detox --version`

@@ -86,7 +86,7 @@ Scripts that generate files MUST follow the naming conventions defined in the na
 
 Notes:
 - Stubs contain only `SKILL.md` pointers back to `.ai/skills/`
-- Do not edit stub directories directly; regenerate with `.ai/scripts/sync-skills.cjs`
+- Do not edit stub directories directly; regenerate with `.ai/scripts/sync-skills.mjs`
 
 ### Other Top-Level Directories (Recommended)
 

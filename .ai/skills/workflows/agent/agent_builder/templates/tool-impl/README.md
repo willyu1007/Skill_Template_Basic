@@ -6,11 +6,11 @@ This directory contains template patterns for implementing different types of to
 
 | Template | Use Case |
 |----------|----------|
-| `http_api.js.template` | REST API integrations |
-| `database.js.template` | Database query tools |
-| `mcp_server.js.template` | MCP protocol tools |
-| `filesystem.js.template` | File system operations |
-| `internal_service.js.template` | Internal service calls |
+| `http_api.mjs.template` | REST API integrations |
+| `database.mjs.template` | Database query tools |
+| `mcp_server.mjs.template` | MCP protocol tools |
+| `filesystem.mjs.template` | File system operations |
+| `internal_service.mjs.template` | Internal service calls |
 
 ## Usage
 

@@ -53,15 +53,15 @@ Open **one** example only if you need a concrete template.
 
 ## Verification
 - If you changed **skills**:
-  - `node .ai/scripts/lint-skills.cjs --strict`
-  - `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`
+  - `node .ai/scripts/lint-skills.mjs --strict`
+  - `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
 
 - Registry sanity (recommended; run before release):
-  - `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.cjs`
+  - `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.mjs`
   - In real (non-template) repos, run with `--strict` in CI.
 
 - If you changed **LLM config/env keys** (or introduced new ones):
-  - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+  - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 
 - If the host repo has tests/lint:
   - run the smallest relevant test suite for the modified area (wrapper/adapter/registry).

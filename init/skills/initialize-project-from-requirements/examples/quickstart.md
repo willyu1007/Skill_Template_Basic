@@ -5,29 +5,29 @@
 3. Validate Stage A docs:
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs --docs-root init/stage-a-docs
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs check-docs --docs-root init/stage-a-docs
 ```
 
 4. Review Stage B blueprint at `init/project-blueprint.json` and validate:
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs validate   --blueprint init/project-blueprint.json
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs validate   --blueprint init/project-blueprint.json
 ```
 
 5. Dry-run scaffold:
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs scaffold   --blueprint init/project-blueprint.json   --repo-root .
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs scaffold   --blueprint init/project-blueprint.json   --repo-root .
 ```
 
 6. Apply Stage C (scaffold + manifest + wrapper sync):
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs apply   --blueprint init/project-blueprint.json   --repo-root .   --providers codex,claude   --require-stage-a
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply   --blueprint init/project-blueprint.json   --repo-root .   --providers codex,claude   --require-stage-a
 ```
 
 7. Optional cleanup (remove init kit):
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs cleanup-init   --repo-root .   --apply   --i-understand --archive
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init   --repo-root .   --apply   --i-understand --archive
 ```

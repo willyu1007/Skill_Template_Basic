@@ -19,7 +19,7 @@ Ship LLM changes safely: predictable behavior, bounded failure, observable cost/
    - Config keys registered: `.ai/llm-config/registry/config_keys.yaml`
 
 2) **Config key gate**
-   - Run: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+   - Run: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 
 3) **Correctness regression**
    - Contract tests for adapters/wrapper

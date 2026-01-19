@@ -14,12 +14,12 @@ This handbook provides design principles, decision trees, boundary conditions, a
 agents/<agent_id>/
 ├── src/
 │   ├── core/           # Provider-agnostic logic
-│   │   ├── run.js      # Main orchestration
-│   │   ├── tools.js    # Tool implementations
-│   │   ├── prompts.js  # Prompt loading
-│   │   ├── conversation.js  # Memory management
-│   │   ├── contracts.js     # Schema validation
-│   │   └── errors.js        # Error types
+│   │   ├── run.mjs      # Main orchestration
+│   │   ├── tools.mjs    # Tool implementations
+│   │   ├── prompts.mjs  # Prompt loading
+│   │   ├── conversation.mjs  # Memory management
+│   │   ├── contracts.mjs     # Schema validation
+│   │   └── errors.mjs        # Error types
 │   │
 │   └── adapters/       # Integration-specific code
 │       ├── http/       # HTTP + WebSocket server
@@ -423,7 +423,7 @@ When `AGENT_ENABLED` is `false` or missing:
 | Symptom | Likely Cause | Resolution |
 |---------|--------------|------------|
 | 503 on all requests | AGENT_ENABLED=false | Set AGENT_ENABLED=true |
-| Tool returns "not implemented" | Stage D incomplete | Implement tool logic in tools.js |
+| Tool returns "not implemented" | Stage D incomplete | Implement tool logic in tools.mjs |
 | Conversation not persisting | storage.kind=none | Configure persistent storage |
 | Summary never updates | threshold too high | Lower threshold values |
 | Streaming not working | Wrong protocol | Ensure client uses websocket |

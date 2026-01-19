@@ -7,14 +7,14 @@ You are initializing a new project using the repository template.
 - You MUST follow a **3-stage, file-based** pipeline:
   - **Stage A**: write requirement docs under `init/stage-a-docs/` (DoD-driven).
   - **Stage B**: write a machine-readable blueprint at `init/project-blueprint.json`.
-  - **Stage C**: scaffold minimal structure + select skill packs by updating `.ai/skills/_meta/sync-manifest.json`, then run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
+  - **Stage C**: scaffold minimal structure + select skill packs by updating `.ai/skills/_meta/sync-manifest.json`, then run `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`.
 - You MUST keep changes **verifiable**:
   - Each stage ends with a checklist and a command that verifies outputs.
 - You MUST NOT create dev-docs task bundles during initialization:
   - Use the 3-stage init pipeline only; dev-docs workflows apply after init is complete.
 - You MUST NOT edit generated wrapper stubs directly:
   - Do not edit `.codex/skills/` or `.claude/skills/` by hand.
-  - Only edit SSOT in `.ai/skills/`, then run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
+  - Only edit SSOT in `.ai/skills/`, then run `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`.
 
 ## Inputs you MUST collect from the user
 
@@ -56,13 +56,13 @@ The `start` command automatically creates template files at `init/stage-a-docs/`
 Run:
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs --docs-root init/stage-a-docs
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs check-docs --docs-root init/stage-a-docs
 ```
 
 If the repo uses a strict gate, run:
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs check-docs --docs-root init/stage-a-docs --strict
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs check-docs --docs-root init/stage-a-docs --strict
 ```
 
 Iterate with the user until Stage A passes.
@@ -79,7 +79,7 @@ Start from:
 ### Verification (required)
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs validate   --blueprint init/project-blueprint.json
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs validate   --blueprint init/project-blueprint.json
 ```
 
 ### Pack suggestions (recommended)
@@ -87,7 +87,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 Run:
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs suggest-packs   --blueprint init/project-blueprint.json   --repo-root .
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs suggest-packs   --blueprint init/project-blueprint.json   --repo-root .
 ```
 
 - If recommended packs are missing, you SHOULD discuss with the user before changing `skills.packs`.
@@ -98,19 +98,19 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs 
 ### Dry-run scaffold first (required)
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs scaffold   --blueprint init/project-blueprint.json   --repo-root .
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs scaffold   --blueprint init/project-blueprint.json   --repo-root .
 ```
 
 ### Apply (writes changes + sync wrappers)
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs apply   --blueprint init/project-blueprint.json   --repo-root .   --providers codex,claude   --require-stage-a
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply   --blueprint init/project-blueprint.json   --repo-root .   --providers codex,claude   --require-stage-a
 ```
 
 The apply command will:
 - create missing scaffold directories (no overwrites),
 - update `.ai/skills/_meta/sync-manifest.json` (based on `skills.packs`),
-- run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes` to regenerate wrappers.
+- run `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes` to regenerate wrappers.
 
 If the user opts out of `agent_builder`, add:
 
@@ -130,7 +130,7 @@ If Stage C `apply` fails with `EPERM` for `.codex/skills/`:
 If the user decides to remove `agent_builder` after initialization is complete, run:
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs prune-agent-builder   --repo-root .   --apply   --i-understand
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder   --repo-root .   --apply   --i-understand
 ```
 
 The prune-agent-builder command will remove `.ai/skills/workflows/agent` and re-sync wrappers.
@@ -142,7 +142,7 @@ If you plan to prune multiple skills post-init, you MAY delete `agent_builder` v
 Only if the user asks to remove bootstrap artifacts (optionally archive to `docs/project/` first):
 
 ```bash
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs cleanup-init   --repo-root .   --apply   --i-understand --archive
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init   --repo-root .   --apply   --i-understand --archive
 ```
 
 ## Prompt template (use internally)
@@ -153,7 +153,7 @@ Goal:
 Constraints (MUST / DON'T):
 - MUST output Stage A docs under `init/stage-a-docs/` during initialization.
 - MUST output blueprint at `init/project-blueprint.json` during initialization.
-- MUST update skills via `.ai/skills/_meta/sync-manifest.json` and run `node .ai/scripts/sync-skills.cjs --scope current --providers both --mode reset --yes`.
+- MUST update skills via `.ai/skills/_meta/sync-manifest.json` and run `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`.
 - DON'T edit `.codex/skills/` or `.claude/skills/` directly.
 - DON'T create dev-docs task bundles during initialization (use dev-docs only after init is complete).
 
@@ -191,7 +191,7 @@ Rules:
 2. Dry run the deletion:
 
 ```bash
-node .ai/scripts/delete-skills.cjs --skills "skill-a,skill-b" --dry-run
+node .ai/scripts/delete-skills.mjs --skills "skill-a,skill-b" --dry-run
 ```
 
 3. Confirm with the user, then re-run with `--yes` (optionally `--clean-empty`).
@@ -203,7 +203,7 @@ Record TBD items in `init/stage-a-docs/risk-open-questions.md` (owner + options 
 
 ### Notes
 
-- `delete-skills.cjs` is an alias of `delete-skill.cjs` and accepts the same flags (`--skill`, `--skills`, `--scope`).
+- `delete-skills.mjs` is an alias of `delete-skill.mjs` and accepts the same flags (`--skill`, `--skills`, `--scope`).
 - Deletions are destructive; use `--dry-run` first and keep a git rollback plan.
 - Re-running is safe: already-removed skills are skipped.
 

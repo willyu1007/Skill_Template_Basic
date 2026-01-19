@@ -44,7 +44,7 @@ When a user requests "I want an Agent with X capability", execute the following 
 ### Phase 1: Stage A — Interview
 
 **Actions**:
-1. Run: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js start`
+1. Run: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs start`
 2. Note the temporary workdir path returned.
 3. Walk through `reference/decision_checklist.md` with the user:
    - For each decision point, ask clarifying questions if needed
@@ -65,14 +65,14 @@ Stage A complete. Please review the integration decision:
 Type "approve A" to proceed to Blueprint generation.
 ```
 
-**On Approval**: Run `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js approve --workdir <WORKDIR> --stage A`
+**On Approval**: Run `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs approve --workdir <WORKDIR> --stage A`
 
 ### Phase 2: Stage B — Blueprint
 
 **Actions**:
 1. Encode all decisions into `stage-b/agent-blueprint.json` following the schema at `templates/agent-blueprint.schema.json`.
 2. Ensure all required blocks are present and valid.
-3. Run validation: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js validate-blueprint --workdir <WORKDIR>`
+3. Run validation: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs validate-blueprint --workdir <WORKDIR>`
 4. If validation fails, fix errors and re-validate.
 
 **Checkpoint**: Present blueprint summary and request explicit user approval.
@@ -89,14 +89,14 @@ Blueprint validated successfully. Key configuration:
 Type "approve B" to proceed to scaffolding.
 ```
 
-**On Approval**: Run `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js approve --workdir <WORKDIR> --stage B`
+**On Approval**: Run `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs approve --workdir <WORKDIR> --stage B`
 
 ### Phase 3: Stage C — Scaffold
 
 **Actions**:
-1. Run plan first: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js plan --workdir <WORKDIR> --repo-root .`
+1. Run plan first: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs plan --workdir <WORKDIR> --repo-root .`
 2. Present the file list to be created.
-3. Run apply: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js apply --workdir <WORKDIR> --repo-root . --apply`
+3. Run apply: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs apply --workdir <WORKDIR> --repo-root . --apply`
 4. Report created files and any skipped files.
 
 **Output**: List of generated files organized by category (code, docs, config).
@@ -108,7 +108,7 @@ Type "approve B" to proceed to scaffolding.
 **Actions** (performed by developer or LLM):
 1. **Implement Tools**: For each tool in `blueprint.tools.tools[]`:
    - Read tool specification (kind, schemas, timeouts, auth)
-   - Implement logic in `src/core/tools.js` using patterns from `reference/stage_d_implementation_guide.md`
+   - Implement logic in `src/core/tools.mjs` using patterns from `reference/stage_d_implementation_guide.md`
    - Add required env vars to `.env.example` if not present
 
 2. **Write Prompt Pack**: Based on `agent.summary`, `scope`, and `security`:
@@ -117,7 +117,7 @@ Type "approve B" to proceed to scaffolding.
    - Write `prompts/developer.md` with internal instructions
 
 3. **Expand Tests**: For each scenario in `acceptance.scenarios[]`:
-   - Add/extend tests under `tests/` (scaffold includes `tests/smoke.test.js`)
+   - Add/extend tests under `tests/` (scaffold includes `tests/smoke.test.mjs`)
    - Include given/when/then structure
    - Include expected_output_checks as assertions
 
@@ -126,13 +126,13 @@ Type "approve B" to proceed to scaffolding.
 ### Phase 5: Stage E — Verify
 
 **Actions**:
-1. Run verification: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js verify --workdir <WORKDIR> --repo-root .`
+1. Run verification: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs verify --workdir <WORKDIR> --repo-root .`
 2. Review generated evidence:
    - `stage-e/verification-evidence.json` (structured data)
    - `stage-e/verification-report.md` (human-readable summary)
 3. If any scenario fails, investigate and fix.
 4. Update docs if needed based on implementation.
-5. Cleanup: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js finish --workdir <WORKDIR> --apply`
+5. Cleanup: `node .ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs finish --workdir <WORKDIR> --apply`
 
 **Output**: Verification report and final delivery summary.
 
@@ -160,7 +160,7 @@ Type "approve B" to proceed to scaffolding.
 
 ### Stage A — Interview (temporary workdir only)
 
-1. Create a temporary workdir via `agent-builder.js start`.
+1. Create a temporary workdir via `agent-builder.mjs start`.
 2. Use the **Decision Checklist** (`reference/decision_checklist.md`) to capture all required decisions.
 3. Produce in the workdir:
    - `stage-a/interview-notes.md`
@@ -183,7 +183,7 @@ Type "approve B" to proceed to scaffolding.
 
 ### Stage D — Implement (manual / LLM-assisted)
 
-1. Implement real tool logic in `src/core/tools.js` based on blueprint tool definitions.
+1. Implement real tool logic in `src/core/tools.mjs` based on blueprint tool definitions.
 2. Write prompt pack content (`prompts/*.md`) based on agent scope and security policy.
 3. Write acceptance test cases based on `acceptance.scenarios[]`.
 4. See `reference/stage_d_implementation_guide.md` for patterns and best practices.
@@ -224,7 +224,7 @@ Type "approve B" to proceed to scaffolding.
 Use the dependency-free helper script:
 
 ```
-.ai/skills/workflows/agent/agent_builder/scripts/agent-builder.js
+.ai/skills/workflows/agent/agent_builder/scripts/agent-builder.mjs
 ```
 
 | Command | Purpose |
@@ -275,7 +275,7 @@ When executing this skill, always produce:
 ### Interfaces
 | Type | Entrypoint | Response Mode |
 |------|------------|---------------|
-| http | node src/adapters/http/server.js | blocking |
+| http | node src/adapters/http/server.mjs | blocking |
 | http (SSE) | POST /run/stream | streaming |
 | http (WS) | ws://.../ws | streaming |
 | ... | ... | ... |

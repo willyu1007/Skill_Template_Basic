@@ -17,7 +17,7 @@ All LLM configuration keys MUST be registered in:
 This registry is enforced by:
 
 ```bash
-node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs
+node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs
 ```
 
 ## Key categories

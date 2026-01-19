@@ -32,7 +32,7 @@ Update prompts without drift by using stable IDs and immutable versions.
    - Validate required variables at runtime (fail fast with clear error).
    - Avoid introducing new env/config keys unless necessary; if you do:
      - register in `.ai/llm-config/registry/config_keys.yaml`
-     - run `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+     - run `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 
 5) **Evaluation / regression**
    - Add at least a small regression set.
@@ -44,7 +44,7 @@ Update prompts without drift by using stable IDs and immutable versions.
 - Regression artifacts (tests/eval notes)
 
 ## Required verification
-- If new keys: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.cjs`
+- If new keys: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
 - Run prompt regression (minimum: golden tests / snapshots)
 
 ## Optional deep references

@@ -28,13 +28,13 @@ Convert Stage A documents into a JSON blueprint that drives scaffolding and skil
 
 ```bash
 # Validate blueprint
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs validate
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs validate
 
 # Check pack recommendations
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs suggest-packs
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs suggest-packs
 
 # Approve and advance to Stage C
-node init/skills/initialize-project-from-requirements/scripts/init-pipeline.cjs approve --stage B
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage B
 ```
 
 ## See also
