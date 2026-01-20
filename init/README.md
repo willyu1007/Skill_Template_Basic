@@ -53,7 +53,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 ## Post-init Cleanup
 
 ```bash
-# Optional: remove agent_builder if not needed
+# Optional: remove agent-builder if not needed
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder --apply --i-understand
 
 # Optional: archive and remove init kit
@@ -159,7 +159,7 @@ Apply scaffold + manifest update + wrapper sync.
 # Standard apply
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both
 
-# With agent_builder removal
+# With agent-builder removal
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both --skip-agent-builder --i-understand
 ```
 

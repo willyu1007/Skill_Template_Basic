@@ -10,11 +10,16 @@
  * - SKILL.md <= 500 lines
  * - Presence of ## Verification and ## Boundaries sections
  * - No cross-skill references (optional)
+ *
+ * @reference .ai/skills/standards/naming-conventions/SKILL.md
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { colors } from './lib/colors.mjs';
+import { extractFrontmatterBlock } from './lib/frontmatter.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,14 +29,6 @@ const SKILL_MD = 'SKILL.md';
 const MAX_LINES = 500;
 
 const defaultSkillsRoot = path.join(repoRoot, '.ai', 'skills');
-
-const colors = {
-  red: (s) => `\x1b[31m${s}\x1b[0m`,
-  green: (s) => `\x1b[32m${s}\x1b[0m`,
-  yellow: (s) => `\x1b[33m${s}\x1b[0m`,
-  cyan: (s) => `\x1b[36m${s}\x1b[0m`,
-  gray: (s) => `\x1b[90m${s}\x1b[0m`,
-};
 
 function printHelp() {
   console.log([
@@ -134,14 +131,7 @@ function parseFrontmatter(content) {
   return result;
 }
 
-function extractFrontmatterBlock(content) {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
-  if (!match) return null;
-  const full = match[0];
-  const yaml = match[1];
-  const rest = content.slice(full.length);
-  return { full, yaml, rest };
-}
+// extractFrontmatterBlock is imported from ./lib/frontmatter.mjs
 
 function findFirstHeadingText(markdown) {
   const lines = String(markdown || '').split(/\r?\n/);

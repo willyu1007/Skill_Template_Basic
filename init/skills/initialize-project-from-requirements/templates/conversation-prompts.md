@@ -60,7 +60,7 @@ Ask these before writing the first draft of `init/stage-a-docs/requirements.md`:
 - "How do we measure success? (business + product + reliability)"
 
 ### 8. Agent builder workflow (heavy, optional)
-- "Do you need the `agent_builder` workflow skill in this repo?"
+- "Do you need the `agent-builder` workflow skill in this repo?"
 - If no: record the decision and plan to run Stage C with `--skip-agent-builder --i-understand` to prune `.ai/skills/workflows/agent` after initialization.
 
 ## B. Branch modules (ask only if relevant)

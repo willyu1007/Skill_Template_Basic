@@ -6,9 +6,9 @@
 
 ## Entry point (progressive disclosure)
 
-**Skill:** `llm_engineering`
+**Skill:** `llm-engineering`
 
-**Procedures:** `.ai/skills/workflows/llm/llm_engineering/reference/procedures/`
+**Procedures:** `.ai/skills/workflows/llm/llm-engineering/reference/procedures/`
 
 Routing (open exactly one):
 - Add / integrate a provider: `add-provider.md`
@@ -30,7 +30,7 @@ These files are the **single source of truth** for stable identifiers and allowe
    - Never introduce new LLM env/config keys ad-hoc.
    - Register first in `.ai/llm-config/registry/config_keys.yaml`.
    - Verify:
-     - `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
+     - `node .ai/skills/workflows/llm/llm-engineering/scripts/check-llm-config-keys.mjs`
 
 2) **No secrets in repo**
    - Store only non-secret references (e.g., `credential_ref`).

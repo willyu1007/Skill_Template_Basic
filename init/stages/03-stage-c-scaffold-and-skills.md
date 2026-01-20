@@ -28,7 +28,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 # Apply scaffold + manifest + wrappers
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both
 
-# Apply without agent_builder
+# Apply without agent-builder
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both --skip-agent-builder --i-understand
 
 # Approve and complete initialization
@@ -38,7 +38,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 ## Post-init options
 
 ```bash
-# Prune agent_builder after init (if decided later)
+# Prune agent-builder after init (if decided later)
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder --apply --i-understand
 
 # Cleanup init kit (optionally archive first)

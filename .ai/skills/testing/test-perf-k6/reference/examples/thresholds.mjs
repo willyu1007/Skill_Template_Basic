@@ -87,7 +87,7 @@ export const sloThresholds = {
 // USAGE EXAMPLE
 // =============================================================================
 /*
-import { smokeThresholds, apiThresholds } from './thresholds.mjs';
+		import { smokeThresholds, apiThresholds } from './thresholds.mjs';
 
 export const options = {
   vus: 10,

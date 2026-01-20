@@ -113,7 +113,7 @@ Run the Stage C checklist after `apply` command, **before** cleanup.
 - [ ] Does `.ai/skills/_meta/sync-manifest.json` reflect `skills.packs`?
 - [ ] Are `.codex/skills/` and `.claude/skills/` wrappers generated?
 - [ ] Can you list the enabled skills and verify they match expectations?
-- [ ] If the user opted out of `agent_builder`, is `.ai/skills/workflows/agent` removed and wrappers re-synced?
+- [ ] If the user opted out of `agent-builder`, is `.ai/skills/workflows/agent` removed and wrappers re-synced?
 
 ### C3. Cleanup Readiness
 

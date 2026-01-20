@@ -12,13 +12,12 @@
 - **SSOT**: edit skills only under `.ai/skills/`.
 - **Generated stubs**: do not edit `.codex/skills/` or `.claude/skills/` directly. Regenerate via sync.
 - **Progressive disclosure**: do not recursively enumerate `.ai/` to "discover" content.
-- **ESM (.mjs)**: all scripts in this repo use ES Modules with `.mjs` extension. Use `import`/`export` syntax, not `require()`.
 
 ## Routing
 
 - If the task is **LLM engineering** (provider integration, calling wrappers, profiles, prompts, cost/telemetry, credentials/config keys):
   - Open: `.ai/llm-config/AGENTS.md`
-  - Invoke workflow skill: `llm_engineering`
+  - Invoke workflow skill: `llm-engineering`
 - If the task is **skill authoring/maintenance**:
   - Open: `.ai/skills/standards/documentation-guidelines/SKILL.md`
   - Run:
@@ -44,6 +43,6 @@ AI/LLM MUST NOT:
 
 - Lint skills: `node .ai/scripts/lint-skills.mjs --strict`
 - Sync stubs: `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
-- Delete skills: `node .ai/scripts/delete-skills.mjs --skill <name|path> --yes`
-- LLM config key gate: `node .ai/skills/workflows/llm/llm_engineering/scripts/check-llm-config-keys.mjs`
-- LLM registry sanity: `node .ai/skills/workflows/llm/llm_engineering/scripts/validate-llm-registry.mjs`
+- Delete skills: `node .ai/scripts/sync-skills.mjs --delete-skills <name|path> --delete-scope all --clean-empty --yes` (preview with `--dry-run`)
+- LLM config key gate: `node .ai/skills/workflows/llm/llm-engineering/scripts/check-llm-config-keys.mjs`
+- LLM registry sanity: `node .ai/skills/workflows/llm/llm-engineering/scripts/validate-llm-registry.mjs`

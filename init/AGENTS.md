@@ -30,7 +30,7 @@ Minimum required inputs:
 - tech stack (programming language, package manager, frontend/backend frameworks)
 - repo layout intent (`single` vs `monorepo`)
 - quality expectations (testing/CI/devops)
-- whether to keep the heavy `agent_builder` workflow skill (if not needed, prune it after init)
+- whether to keep the heavy `agent-builder` workflow skill (if not needed, prune it after init)
 - post-init skill retention preferences (if known; otherwise decide after Stage C)
 
 If the user cannot decide, you MUST record TBD items in `init/stage-a-docs/risk-open-questions.md` (owner + options + decision due).
@@ -112,7 +112,7 @@ The apply command will:
 - update `.ai/skills/_meta/sync-manifest.json` (based on `skills.packs`),
 - run `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes` to regenerate wrappers.
 
-If the user opts out of `agent_builder`, add:
+If the user opts out of `agent-builder`, add:
 
 ```bash
 --skip-agent-builder --i-understand
@@ -127,7 +127,7 @@ If Stage C `apply` fails with `EPERM` for `.codex/skills/`:
 
 ### Optional: prune agent builder after init
 
-If the user decides to remove `agent_builder` after initialization is complete, run:
+If the user decides to remove `agent-builder` after initialization is complete, run:
 
 ```bash
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder   --repo-root .   --apply   --i-understand
@@ -135,7 +135,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 
 The prune-agent-builder command will remove `.ai/skills/workflows/agent` and re-sync wrappers.
 
-If you plan to prune multiple skills post-init, you MAY delete `agent_builder` via the post-init skill pruning step instead of running this command.
+If you plan to prune multiple skills post-init, you MAY delete `agent-builder` via the post-init skill pruning step instead of running this command.
 
 ### Optional: remove init kit after success
 

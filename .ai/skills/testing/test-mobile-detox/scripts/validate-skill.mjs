@@ -158,9 +158,16 @@ function main() {
   }
 
   // Validate procedures exist and are well-structured.
+  // Skills can opt out by creating a .no-procedures marker file.
   const procDir = path.join(skillRoot, 'reference', 'procedures');
   const procs = listMarkdownFiles(procDir);
-  if (!procs.length) die('No procedures found in reference/procedures/. Add at least one procedure.');
+  const requireProcedures = !existsRel(skillRoot, '.no-procedures');
+  if (requireProcedures && !procs.length) {
+    die('No procedures found in reference/procedures/. Add at least one procedure.\n(To opt out, create a .no-procedures file in the skill root)');
+  }
+  if (!requireProcedures && !procs.length) {
+    console.log(colors.gray('  [i] Procedures check skipped (.no-procedures marker present)'));
+  }
 
   const required = ['Goal', 'Inputs (collect before edits)', 'Steps', 'Outputs', 'Required verification', 'Boundaries'];
   const recommended = ['Troubleshooting'];

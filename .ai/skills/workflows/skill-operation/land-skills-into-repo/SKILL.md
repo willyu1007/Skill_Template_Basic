@@ -34,7 +34,7 @@ You MUST obtain:
 
 You MAY additionally provide:
 - `ssot_dir`: Destination SSOT directory inside the repo (default: `.ai/skills`).
-- `config`: A JSON config file (see `./templates/landing-config.*`).
+- `config`: A JSON config file (see `./templates/landing-config.schema.json` and `./templates/landing-config.example.json`).
 
 ## Outputs
 The skill writes:

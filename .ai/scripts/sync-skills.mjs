@@ -794,6 +794,7 @@ function sync() {
   }
 
   const isDestructive =
+    !args.list &&
     !args.dryRun &&
     (mode === 'reset' ||
       (mode === 'update' && args.prune) ||

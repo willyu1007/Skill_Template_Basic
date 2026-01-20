@@ -57,7 +57,7 @@ description: k6 performance testing: scenario templates, thresholds, CI gating, 
 
 - If you changed **perf scripts**:
   - `k6 version` (or `docker run --rm grafana/k6 version`)
-  - `k6 run <script.js>`
+  - `k6 run <script.mjs>`
 
 ## Boundaries
 - Do not edit `.codex/skills/` or `.claude/skills/` directly (generated).

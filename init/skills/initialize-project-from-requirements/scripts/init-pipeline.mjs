@@ -1225,7 +1225,7 @@ function main() {
       console.log('[ok] Stage C approved');
       console.log('[ok] Initialization complete!');
       
-      // Check whether agent_builder exists and inform the user
+      // Check whether agent-builder exists and inform the user
       const agentDir = path.join(repoRoot, '.ai', 'skills', 'workflows', 'agent');
       if (fs.existsSync(agentDir)) {
         console.log('\n┌─────────────────────────────────────────────────────────┐');

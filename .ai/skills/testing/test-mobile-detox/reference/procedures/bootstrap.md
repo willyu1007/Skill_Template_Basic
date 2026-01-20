@@ -32,7 +32,7 @@ Bootstrap Detox E2E testing with:
    - Preferred (if supported by your Detox version):
      - `npx detox init -r jest`
    - If the init command is not available:
-     - Create a `detox.config.js` (or `package.json` config) that defines:
+     - Create a `detox.config.mjs` (or `package.json` config) that defines:
        - app binaries/build commands for iOS/Android
        - device configurations (simulator/emulator)
        - test runner = Jest

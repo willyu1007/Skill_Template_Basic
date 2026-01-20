@@ -143,6 +143,34 @@ Examples:
 - Name by intent/process: `refactor-planner`, `release-checklist`
 - Path: `.ai/skills/.../<workflow-name>/SKILL.md`
 
+## Template Placeholder Conventions (MUST)
+
+Use consistent placeholder formats in template files:
+
+| Format | Usage | Example |
+|--------|-------|---------|
+| `<placeholder>` | User-editable content (manual fill) | `<Task Title>`, `<One-sentence goal>` |
+| `{{variable}}` | Script-replaced variables (auto-generated) | `{{agent_id}}`, `{{timestamp}}` |
+| `$ENV_VAR` | Environment variable reference | `$DATABASE_URL`, `$API_KEY` |
+
+**Rules:**
+- `<placeholder>`: Angle brackets indicate the user must replace this content manually
+- `{{variable}}`: Double curly braces indicate scripts will substitute this value automatically
+- Do NOT mix formats in the same context (e.g., don't use `<var>` for script substitution)
+- Template files SHOULD include comments explaining which placeholders are user-filled vs auto-replaced
+
+**Examples:**
+
+```markdown
+# User-filled template (roadmap.md)
+## Goal
+- <One-sentence goal statement>
+
+# Script-generated template (verification-report.md)
+- Agent ID: {{agent_id}}
+- Generated: {{timestamp}}
+```
+
 ## Versioning and Changes (SHOULD)
 
 - Prefer explicit version fields / change logs for SSOT content

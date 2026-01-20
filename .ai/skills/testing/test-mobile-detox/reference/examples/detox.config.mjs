@@ -4,10 +4,10 @@
  * Dual-platform configuration for iOS and Android.
  * Adjust app paths, device names, and build commands for your project.
  *
- * Usage: Copy to your project root as `detox.config.js` or `.detoxrc.js`
+ * Usage: Copy to your project root as `detox.config.mjs` or `.detoxrc.mjs`
  */
-/** @type {Detox.DetoxConfig} */
-module.exports = {
+/** @type {import('detox').DetoxConfig} */
+const config = {
   // Test runner configuration
   testRunner: {
     args: {
@@ -159,3 +159,5 @@ module.exports = {
     },
   },
 };
+
+export default config;

@@ -14,11 +14,11 @@ Treat `prisma/schema.prisma` as the schema Single Source of Truth (SSOT) and saf
 - execution logging and post-verification
 - **LLM context refresh** via `docs/context/db/schema.json`
 
-This skill is intentionally written for a **development workflow** (developers manage DB changes via Prisma), not a DBA-centric workflow.
+The `sync-db-schema-from-code` skill targets a **development workflow** (developers manage DB changes via Prisma), not a DBA-centric workflow.
 
 ## Hard precondition (SSOT mode gate)
 
-This skill MUST be used only when the project DB SSOT is `repo-prisma`:
+Use the `sync-db-schema-from-code` skill only when the project DB SSOT is `repo-prisma`:
 
 - Source of truth: `prisma/schema.prisma`
 - DB changes propagate via Prisma migrations
@@ -81,7 +81,7 @@ Evidence files:
 
 1. Confirm intent is **code → DB**.
 2. Confirm DB SSOT mode is `repo-prisma` (`docs/project/db-ssot.json`).
-   - If not, STOP (this skill covers only `repo-prisma`).
+   - If not, STOP: the `sync-db-schema-from-code` skill covers only `repo-prisma`.
 3. Confirm the target environment and DB dialect.
 4. Choose evidence directory.
 

@@ -99,7 +99,7 @@ Optional inputs:
    - Asking the question is **mandatory**, but completing the glossary is **optional** — user may skip if terminology is straightforward
 
 3. Use `templates/conversation-prompts.md` to run a structured requirements interview.
-4. Confirm whether the heavy `agent_builder` workflow is needed; if not, plan to run Stage C with `--skip-agent-builder --i-understand`.
+4. Confirm whether the heavy `agent-builder` workflow is needed; if not, plan to run Stage C with `--skip-agent-builder --i-understand`.
 5. (Optional) Update `init/.init-state.json` `stage-a.mustAsk.*` as each MUST-ask question is asked/answered, so `status` reflects interview progress.
 6. Draft the four Stage A documents using templates under `templates/`.
 7. **Self-review**: Complete Stage A checklist in `templates/quality-checklist.md`.
@@ -174,7 +174,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply   --blueprint init/project-blueprint.json   --repo-root .   --providers codex,claude   --require-stage-a
 ```
 
-If the user opts out of `agent_builder`, add:
+If the user opts out of `agent-builder`, add:
 
 ```bash
 --skip-agent-builder --i-understand
