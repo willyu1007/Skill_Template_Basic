@@ -36,6 +36,8 @@ Template repository. Users clone the repo to start new AI-friendly projects.
 
 ## Coding Workflow (MUST)
 
-- Before modifying code/config for a non-trivial task, apply the Decision Gate in `dev-docs/AGENTS.md` and create/update the dev-docs task bundle as required.
-- If the user asks for planning artifacts (plan/roadmap/milestones/implementation plan) before coding, use `plan-maker` first, then ask for confirmation to proceed with implementation.
-- If the task needs context preservation (multi-session, handoff) or qualifies as complex, follow `dev-docs/AGENTS.md` and use dev-docs workflows (`create-dev-docs-plan`, `update-dev-docs-for-handoff`).
+- Before modifying code/config for a task that meets the Decision Gate in `dev-docs/AGENTS.md`, create/update the dev-docs task bundle as required.
+- If the user asks for planning artifacts (plan/roadmap/milestones/implementation plan) before coding:
+  - If the task meets the Decision Gate, use `plan-maker` first, then ask for confirmation to proceed with implementation.
+  - If the task is trivial (<30 min), provide an in-chat plan (do NOT write under `dev-docs/`).
+  - If the task needs context preservation (multi-session, handoff) or qualifies as complex, follow `dev-docs/AGENTS.md` and use dev-docs workflows.
