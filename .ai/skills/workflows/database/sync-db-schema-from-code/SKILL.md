@@ -141,7 +141,7 @@ Record evidence in `04-post-verify.md`.
 
 - `node .ai/scripts/dbssotctl.mjs sync-to-context`
 
-(If context-awareness is enabled, the command also runs `contextctl touch` best-effort.)
+> **Note:** The generated artifact (`docs/context/db/schema.json`) is produced by `dbssotctl`. Context registration (if any) is the responsibility of external tooling; `dbssotctl` does not auto-invoke context managers.
 
 ## Verification
 

@@ -18,7 +18,6 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 
 import {
   readJsonIfExists,
@@ -260,21 +259,9 @@ function buildContractNone({ repoRoot }) {
   };
 }
 
-function runContextTouch(repoRoot) {
-  const contextctl = path.join(repoRoot, '.ai', 'scripts', 'contextctl.mjs');
-  if (!exists(contextctl)) return { ran: false, reason: 'contextctl.mjs not found' };
-
-  const res = spawnSync('node', [contextctl, 'touch', '--repo-root', repoRoot], {
-    cwd: repoRoot,
-    stdio: 'inherit'
-  });
-
-  if (res.status !== 0) {
-    return { ran: true, ok: false, exitCode: res.status };
-  }
-
-  return { ran: true, ok: true };
-}
+// Note: Context registration (contextctl) is not bundled with this tool.
+// Generated artifacts (docs/context/db/schema.json) are produced here;
+// checksum and registry management is the responsibility of external tooling.
 
 function cmdStatus(repoRoot, format) {
   const resolved = resolveMode(repoRoot);
@@ -350,14 +337,11 @@ function cmdSyncToContext(repoRoot, outPath, format) {
 
   writeJson(outputPath, built.contract);
 
-  const touchRes = runContextTouch(repoRoot);
-
   const result = {
     ok: true,
     mode: resolved.mode,
     out: toPosix(path.relative(repoRoot, outputPath)),
-    warnings: built.warnings,
-    contextTouch: touchRes
+    warnings: built.warnings
   };
 
   if (format === 'json') {
@@ -370,11 +354,6 @@ function cmdSyncToContext(repoRoot, outPath, format) {
   console.log(`  - Out:  ${result.out}`);
   if (built.warnings && built.warnings.length > 0) {
     for (const w of built.warnings) console.warn(`[warn] ${w}`);
-  }
-  if (touchRes.ran) {
-    console.log(`  - contextctl touch: ${touchRes.ok ? 'ok' : `failed (exit ${touchRes.exitCode})`}`);
-  } else {
-    console.log(`  - contextctl touch: skipped (${touchRes.reason})`);
   }
 }
 
