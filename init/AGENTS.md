@@ -139,7 +139,7 @@ If you plan to prune multiple skills post-init, you MAY delete `agent-builder` v
 
 ### Optional: remove init kit after success
 
-Only if the user asks to remove bootstrap artifacts (optionally archive to `docs/project/` first):
+Only if the user asks to remove bootstrap artifacts (optionally archive to `docs/project/overview/` first; override with `--archive-dir` if needed):
 
 ```bash
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init   --repo-root .   --apply   --i-understand --archive
@@ -164,15 +164,17 @@ Acceptance criteria:
 
 ---
 
-## Post-init: Skill Retention and Pruning
+## Stage C: Skill Retention Review (required)
 
-After Stage C completes, decide which skills to keep and prune the rest.
+Skill retention/pruning is reviewed in **Stage C**, after wrappers are generated.
+
+`approve --stage C` will refuse until the review is marked complete.
 
 ### When to ask
 
-At the Stage C completion checkpoint, before updating root `README.md` and `AGENTS.md`.
+After Stage C `apply` completes, before approving Stage C.
 
-### Retention table (required)
+### Retention table (recommended)
 
 Generate a structured, readable table of all current skills from `.ai/skills/`. Start from `init/skills/initialize-project-from-requirements/templates/skill-retention-table.template.md`, and use separate tables for `workflows/` and `standards/` to keep it scannable. Keep the table in-chat only; do NOT save `skill-retention-table.md` as a file.
 
@@ -197,6 +199,14 @@ node .ai/scripts/delete-skills.mjs --skills "skill-a,skill-b" --dry-run
 3. Confirm with the user, then re-run with `--yes` (optionally `--clean-empty`).
 4. Expected result: the script reports deletions under `.ai/skills/`, `.codex/skills/`, and `.claude/skills/`.
 
+### Mark review complete (required)
+
+After the user confirms skill retention (whether they prune or keep everything), run:
+
+```bash
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs review-skill-retention --repo-root .
+```
+
 ### If the user cannot decide
 
 Record TBD items in `init/stage-a-docs/risk-open-questions.md` (owner + options + decision due).
@@ -207,13 +217,13 @@ Record TBD items in `init/stage-a-docs/risk-open-questions.md` (owner + options 
 - Deletions are destructive; use `--dry-run` first and keep a git rollback plan.
 - Re-running is safe: already-removed skills are skipped.
 
-## Post-init: Update Root README.md
+## Stage C: Root README.md
 
-After Stage C and skill pruning (if any), ask the user if they want to update the root `README.md` with project-specific info.
+Stage C `apply` generates a project-specific root `README.md` from the blueprint (template: `init/skills/initialize-project-from-requirements/templates/README.template.md`).
 
 ### When to ask
 
-At the Stage C completion checkpoint, after skill pruning.
+At the Stage C completion checkpoint (review and iterate if needed).
 
 ### What to preserve
 
@@ -237,13 +247,11 @@ From `init/project-blueprint.json` and the scaffolded layout:
 
 ### How to update
 
-1. Read current root `README.md`.
-2. Replace the template title/description with project values.
-3. Update the Quick Start table to point to current entry points (remove `init/` references if init kit is removed).
-4. Update the "What's Inside" tree with the scaffolded directories.
-5. Add or refresh a Tech Stack table if missing.
-6. Preserve remaining sections unless the user requests removal.
-7. Show a diff to the user before writing.
+To regenerate deterministically from blueprint:
+
+```bash
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs update-root-docs --apply --skip-root-agents
+```
 
 ### Format and safety
 
@@ -252,13 +260,13 @@ From `init/project-blueprint.json` and the scaffolded layout:
 - Blast radius: `README.md` only.
 - Idempotency: re-running is safe if you review the diff.
 
-## Post-init: Update Root AGENTS.md
+## Stage C: Root AGENTS.md
 
-After Stage C completes, ask the user if they want to update the root `AGENTS.md` with project-specific info.
+Stage C `apply` updates the root `AGENTS.md` from the blueprint (unless `--skip-root-agents` is used).
 
 ### When to ask
 
-At Stage C completion checkpoint, present option: "update agents" to record tech stack in root AGENTS.md.
+At Stage C completion checkpoint (review and iterate if needed).
 
 ### What to preserve
 
@@ -286,12 +294,11 @@ From `init/project-blueprint.json`:
 
 ### How to update
 
-1. Read current root `AGENTS.md`
-2. Update existing `## Project Type` section if present; otherwise insert after title
-3. Update existing `## Tech Stack` section if present; otherwise insert after Project Type
-4. Update "Key Directories" table with project paths (add project-specific entries)
-5. Preserve all other sections unchanged (including `## Need More?`, routing, global rules, etc.)
-6. Show diff to user before writing
+To regenerate deterministically from blueprint:
+
+```bash
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs update-root-docs --apply --skip-readme
+```
 
 ### Format rules
 

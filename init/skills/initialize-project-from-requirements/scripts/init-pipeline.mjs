@@ -18,6 +18,8 @@
  *   - scaffold       Plan or apply a minimal directory scaffold from the blueprint
  *   - apply          validate + (optional) check-docs + scaffold + configs + manifest update + wrapper sync
  *   - cleanup-init   Remove the `init/` bootstrap kit (opt-in, guarded)
+ *   - review-skill-retention  Mark Stage C skill retention as reviewed
+ *   - update-root-docs  Generate/update root README.md and AGENTS.md from the blueprint
  *
  * This script is intentionally framework-agnostic. It avoids generating code.
  */
@@ -83,17 +85,36 @@ Commands:
                                 Providers to sync (default: both)
     --require-stage-a           Run 'check-docs --strict' and fail if it does not pass
     --skip-configs              Skip generating config files (package.json, etc.)
+    --skip-readme               Skip generating root README.md from blueprint
+    --skip-root-agents          Skip updating root AGENTS.md from blueprint
     --skip-agent-builder        Remove .ai/skills/workflows/agent before wrapper sync (requires --i-understand)
     --cleanup-init              Remove <repo-root>/init after success (requires --i-understand)
+    --archive                   Archive Stage A docs + blueprint before cleanup (requires --cleanup-init)
+    --archive-docs              Archive Stage A docs only before cleanup (requires --cleanup-init)
+    --archive-blueprint         Archive blueprint only before cleanup (requires --cleanup-init)
+    --archive-dir <path>        Archive destination (default: docs/project/overview)
     --i-understand              Required acknowledgement for destructive actions
 
   cleanup-init
     --repo-root <path>          Repo root (default: cwd)
     --apply                      Actually remove init/ (default: dry-run)
-    --archive                    Archive Stage A docs + blueprint to docs/project before cleanup
+    --archive                    Archive Stage A docs + blueprint to docs/project/overview before cleanup
     --archive-docs               Archive Stage A docs only before cleanup
     --archive-blueprint          Archive blueprint only before cleanup
+    --archive-dir <path>        Archive destination (default: docs/project/overview)
     --i-understand              Required acknowledgement (refuses without it)
+
+  review-skill-retention
+    --repo-root <path>          Repo root (default: cwd)
+    Mark Stage C skill retention as reviewed (required before approving Stage C).
+
+  update-root-docs
+    --repo-root <path>          Repo root (default: cwd)
+    --blueprint <path>          Blueprint JSON path (default: <repo-root>/init/project-blueprint.json)
+    --apply                      Actually write root docs (default: dry-run)
+    --skip-readme               Skip generating root README.md
+    --skip-root-agents          Skip updating root AGENTS.md
+    Update root README.md and/or AGENTS.md from the blueprint.
 
   prune-agent-builder
     --repo-root <path>          Repo root (default: cwd)
@@ -110,6 +131,8 @@ Examples:
   node .../init-pipeline.mjs validate --blueprint init/project-blueprint.json
   node .../init-pipeline.mjs approve --stage A
   node .../init-pipeline.mjs apply --blueprint init/project-blueprint.json --providers codex,claude
+  node .../init-pipeline.mjs review-skill-retention
+  node .../init-pipeline.mjs update-root-docs --apply
   node .../init-pipeline.mjs prune-agent-builder --apply --i-understand
   node .../init-pipeline.mjs cleanup-init --apply --i-understand --archive
 `;
@@ -239,6 +262,7 @@ function createInitialState() {
       configsGenerated: false,
       manifestUpdated: false,
       wrappersSynced: false,
+      skillRetentionReviewed: false,
       userApproved: false
     },
     history: []
@@ -305,6 +329,7 @@ function getStageProgress(state) {
       configsGenerated: !!stageStateC.configsGenerated,
       manifestUpdated: !!stageStateC.manifestUpdated,
       wrappersSynced: !!stageStateC.wrappersSynced,
+      skillRetentionReviewed: !!stageStateC.skillRetentionReviewed,
       userApproved: !!stageStateC.userApproved
     }
   };
@@ -345,6 +370,7 @@ function printStatus(state, repoRoot) {
     console.log(`│    Configs generated: ${progress[stageKey('C')].configsGenerated ? '✓' : '✗'}`);
     console.log(`│    Manifest updated: ${progress[stageKey('C')].manifestUpdated ? '✓' : '✗'}`);
     console.log(`│    Wrappers synced: ${progress[stageKey('C')].wrappersSynced ? '✓' : '✗'}`);
+    console.log(`│    Skill retention reviewed: ${progress[stageKey('C')].skillRetentionReviewed ? '✓' : '✗'}`);
   }
 
   console.log('│');
@@ -368,6 +394,9 @@ function printStatus(state, repoRoot) {
   } else if (progress.stage === 'C') {
     if (!progress[stageKey('C')].wrappersSynced) {
       console.log('│    Run: apply --blueprint init/project-blueprint.json');
+    } else if (!progress[stageKey('C')].skillRetentionReviewed) {
+      console.log('│    Review skill retention (keep vs prune)');
+      console.log('│    Then run: review-skill-retention');
     } else if (!progress[stageKey('C')].userApproved) {
       console.log('│    Initialization ready for review');
       console.log('│    After approval run: approve --stage C');
@@ -712,7 +741,7 @@ function generateProjectReadme(repoRoot, blueprint, apply) {
   conditionalBlock('FRONTEND_FRAMEWORK', caps.frontend?.framework, caps.frontend?.enabled);
   conditionalBlock('BACKEND_FRAMEWORK', caps.backend?.framework, caps.backend?.enabled);
   conditionalBlock('DATABASE_KIND', caps.database?.kind, caps.database?.enabled);
-  conditionalBlock('API_STYLE', caps.api?.style, !!caps.api?.style);
+  conditionalBlock('API_STYLE', caps.api?.style, !!caps.api?.style && caps.api.style !== 'none');
   
   // Language-specific blocks
   const isNode = ['typescript', 'javascript'].includes(repo.language);
@@ -722,6 +751,9 @@ function generateProjectReadme(repoRoot, blueprint, apply) {
   conditionalBlock('IS_NODE', 'true', isNode);
   conditionalBlock('IS_PYTHON', 'true', isPython);
   conditionalBlock('IS_GO', 'true', isGo);
+
+  const hasInitKit = fs.existsSync(path.join(repoRoot, 'init', '.init-kit'));
+  conditionalBlock('HAS_INIT_KIT', 'true', hasInitKit);
   
   // Install and dev commands based on package manager
   const installCommands = {
@@ -759,21 +791,23 @@ function generateProjectReadme(repoRoot, blueprint, apply) {
   // Project structure based on layout
   let structure;
   if (repo.layout === 'monorepo') {
-    structure = `├── apps/
-│   ├── frontend/       # Frontend application
-│   └── backend/        # Backend services
-├── packages/
-│   └── shared/         # Shared libraries
-├── .ai/skills/         # AI skills (SSOT)
-├── docs/               # Documentation
-└── ops/                # DevOps configuration`;
+    structure = `apps/
+  frontend/        # Frontend application (if enabled)
+  backend/         # Backend services (if enabled)
+packages/
+  shared/          # Shared libraries
+.ai/               # Skills, scripts, LLM governance
+dev-docs/          # Development task docs (complex work)
+docs/              # Documentation (archive init docs here if desired)
+init/              # Bootstrap-only init kit (optional to remove)`;
   } else {
-    structure = `├── src/
-│   ├── frontend/       # Frontend code
-│   └── backend/        # Backend code
-├── .ai/skills/         # AI skills (SSOT)
-├── docs/               # Documentation
-└── ops/                # DevOps configuration`;
+    structure = `src/
+  frontend/        # Frontend code (if enabled)
+  backend/         # Backend code (if enabled)
+.ai/               # Skills, scripts, LLM governance
+dev-docs/          # Development task docs (complex work)
+docs/              # Documentation (archive init docs here if desired)
+init/              # Bootstrap-only init kit (optional to remove)`;
   }
   replace('PROJECT_STRUCTURE', structure);
   
@@ -790,6 +824,134 @@ function generateProjectReadme(repoRoot, blueprint, apply) {
   
   fs.writeFileSync(readmePath, template, 'utf8');
   return { op: 'write', path: readmePath, mode: 'applied' };
+}
+
+function generateProjectAgents(repoRoot, blueprint, apply) {
+  const agentsPath = path.join(repoRoot, 'AGENTS.md');
+  if (!fs.existsSync(agentsPath)) {
+    return { op: 'skip', path: agentsPath, reason: 'AGENTS.md not found' };
+  }
+
+  const project = blueprint.project || {};
+  const repo = blueprint.repo || {};
+  const caps = blueprint.capabilities || {};
+
+  const projectLine = `**${project.name || 'my-project'}** - ${project.description || 'Project description'}`;
+  let content = fs.readFileSync(agentsPath, 'utf8');
+
+  // Update the short descriptor line (template repos usually have this).
+  if (content.includes('**AI-Friendly Repository Template**')) {
+    content = content.replace(/^\*\*AI-Friendly Repository Template\*\*.*$/m, projectLine);
+  }
+
+  // Project Type section
+  const projectTypeBody = [
+    `${project.name || 'my-project'} - ${project.description || 'Project description'}`,
+    project.domain ? `Domain: ${project.domain}` : null
+  ].filter(Boolean).join('\n');
+
+  const projectTypeRe = /^## Project Type\s*\n[\s\S]*?(?=^##\s|\Z)/m;
+  if (projectTypeRe.test(content)) {
+    content = content.replace(projectTypeRe, `## Project Type\n\n${projectTypeBody}\n\n`);
+  }
+
+  // Tech Stack section (insert after Project Type if missing)
+  const techStackLines = [
+    '## Tech Stack',
+    '',
+    '| Category | Value |',
+    '|----------|-------|',
+    `| Language | ${repo.language || 'TBD'} |`,
+    `| Package Manager | ${repo.packageManager || 'TBD'} |`,
+    `| Layout | ${repo.layout || 'TBD'} |`,
+    caps.frontend && caps.frontend.enabled ? `| Frontend | ${caps.frontend.framework || 'TBD'} |` : null,
+    caps.backend && caps.backend.enabled ? `| Backend | ${caps.backend.framework || 'TBD'} |` : null,
+    caps.database && caps.database.enabled ? `| Database | ${caps.database.kind || 'TBD'} |` : null,
+    caps.api && caps.api.style && caps.api.style !== 'none'
+      ? `| API | ${caps.api.style}${caps.api.auth ? ` (${caps.api.auth})` : ''} |`
+      : null,
+    ''
+  ].filter(Boolean);
+  const techStackSection = techStackLines.join('\n') + '\n';
+
+  const techStackRe = /^## Tech Stack\s*\n[\s\S]*?(?=^##\s|\Z)/m;
+  if (techStackRe.test(content)) {
+    content = content.replace(techStackRe, techStackSection);
+  } else if (projectTypeRe.test(content)) {
+    content = content.replace(projectTypeRe, (match) => match.trimEnd() + '\n\n' + techStackSection + '\n');
+  }
+
+  // Key Directories table: upsert common project paths
+  const keyDirsRe = /^## Key Directories\s*\n[\s\S]*?(?=^##\s|\Z)/m;
+  const keyDirsMatch = content.match(keyDirsRe);
+  if (keyDirsMatch) {
+    const section = keyDirsMatch[0];
+    const lines = section.split(/\r?\n/);
+
+    const headerIdx = lines.findIndex((l) => l.trim() === '| Directory | Purpose |');
+    const sepIdx = headerIdx >= 0 ? headerIdx + 1 : -1;
+
+    if (headerIdx >= 0 && sepIdx < lines.length) {
+      let rowEnd = sepIdx + 1;
+      while (rowEnd < lines.length && lines[rowEnd].trim().startsWith('|')) rowEnd++;
+
+      const rows = lines.slice(sepIdx + 1, rowEnd);
+      const parsed = rows.map((line) => {
+        const m = line.match(/^\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*$/);
+        if (!m) return null;
+        return { dir: m[1].trim(), purpose: m[2].trim() };
+      }).filter(Boolean);
+
+      const desired = [];
+      const hasInit = fs.existsSync(path.join(repoRoot, 'init'));
+      if (hasInit) desired.push({ dir: '`init/`', purpose: 'Bootstrap init kit (remove after init if desired)' });
+
+      if ((repo.layout || '').toLowerCase() === 'monorepo') {
+        desired.push({ dir: '`apps/`', purpose: 'Application entry points (monorepo)' });
+        if (caps.frontend && caps.frontend.enabled) desired.push({ dir: '`apps/frontend/`', purpose: 'Frontend application' });
+        if (caps.backend && caps.backend.enabled) desired.push({ dir: '`apps/backend/`', purpose: 'Backend service(s)' });
+        desired.push({ dir: '`packages/`', purpose: 'Shared packages/libraries' });
+      } else {
+        desired.push({ dir: '`src/`', purpose: 'Application code' });
+        if (caps.frontend && caps.frontend.enabled) desired.push({ dir: '`src/frontend/`', purpose: 'Frontend code' });
+        if (caps.backend && caps.backend.enabled) desired.push({ dir: '`src/backend/`', purpose: 'Backend code' });
+      }
+
+      desired.push({ dir: '`docs/project/overview/`', purpose: 'Project overview + archived init SSOT (optional; created by cleanup-init --archive)' });
+
+      const desiredByDir = new Map(desired.map((d) => [d.dir, d]));
+      const seen = new Set();
+
+      const updatedRows = parsed.map((r) => {
+        const d = desiredByDir.get(r.dir);
+        if (!d) return r;
+        seen.add(r.dir);
+        return { dir: r.dir, purpose: d.purpose };
+      });
+
+      for (const d of desired) {
+        if (!seen.has(d.dir)) updatedRows.push({ dir: d.dir, purpose: d.purpose });
+      }
+
+      const rebuiltRows = updatedRows.map((r) => `| ${r.dir} | ${r.purpose} |`);
+      const newSectionLines = [
+        ...lines.slice(0, sepIdx + 1),
+        ...rebuiltRows,
+        ...lines.slice(rowEnd)
+      ];
+
+      const newSection = newSectionLines.join('\n');
+      content = content.replace(section, newSection);
+    }
+  }
+
+  // Normalize spacing (avoid runaway blank lines)
+  content = content.replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+
+  if (!apply) return { op: 'write', path: agentsPath, mode: 'dry-run' };
+
+  fs.writeFileSync(agentsPath, content, 'utf8');
+  return { op: 'write', path: agentsPath, mode: 'applied' };
 }
 
 function ensureInitTemplates(docsRoot, blueprintPath, apply) {
@@ -929,6 +1091,10 @@ function updateManifest(repoRoot, blueprint, apply) {
 
   // Optional excludes
   const skills = blueprint.skills || {};
+  const includeSkills = Array.isArray(skills.includeSkillNames)
+    ? skills.includeSkillNames
+    : (Array.isArray(skills.includeSkills) ? skills.includeSkills : null);
+  if (includeSkills) manifest.includeSkills = uniq(includeSkills);
   if (Array.isArray(skills.excludePrefixes)) manifest.excludePrefixes = uniq(skills.excludePrefixes);
   const excludeSkills = Array.isArray(skills.excludeSkillNames)
     ? skills.excludeSkillNames
@@ -984,7 +1150,7 @@ function copyFile(src, dest, apply) {
 }
 
 function archiveInitArtifacts(repoRoot, docsRoot, blueprintPath, options, apply) {
-  const targetRoot = path.join(repoRoot, 'docs', 'project');
+  const targetRoot = resolvePath(repoRoot, (options && options.archiveDir) || path.join('docs', 'project', 'overview'));
   const actions = [];
   const errors = [];
 
@@ -1144,12 +1310,26 @@ function main() {
       if (!progress[stageKey('C')].wrappersSynced) {
         die('[error] Stage C not complete yet. Run apply first.');
       }
+      if (!progress[stageKey('C')].skillRetentionReviewed) {
+        console.log('\n== Stage C Skill Retention Review Checkpoint ==\n');
+        console.log('Scaffold and skill wrappers are generated.');
+        console.log('Before approving Stage C, review which skills to keep vs prune.');
+        console.log('\nWhen done, mark review complete by running:');
+        console.log('  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs review-skill-retention');
+        process.exit(0);
+      }
+
       console.log('\n== Stage C Completion Checkpoint ==\n');
       console.log('Scaffold and skill packs applied.');
       console.log('Confirm the user reviewed the initialization result.');
       console.log('\nIf confirmed, run the following to finish initialization:');
       console.log('  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage C');
-      console.log('\nOptional: run cleanup-init --apply --i-understand --archive to archive and remove init/.');
+      console.log('\nNext steps:');
+      console.log('- Review: README.md and AGENTS.md');
+      console.log('- Optional: regenerate root docs:');
+      console.log('  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs update-root-docs --apply');
+      console.log('- Optional: archive and remove init/:');
+      console.log('  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --apply --i-understand --archive');
       process.exit(0);
     }
 
@@ -1216,6 +1396,9 @@ function main() {
       if (!progress[stageKey('C')].wrappersSynced) {
         die('[error] Stage C not complete yet. Run apply first.');
       }
+      if (!progress[stageKey('C')].skillRetentionReviewed) {
+        die('[error] Skill retention has not been reviewed yet. Run review-skill-retention first.');
+      }
       
       state[stageKey('C')].userApproved = true;
       state.stage = 'complete';
@@ -1228,24 +1411,16 @@ function main() {
       // Check whether agent-builder exists and inform the user
       const agentDir = path.join(repoRoot, '.ai', 'skills', 'workflows', 'agent');
       if (fs.existsSync(agentDir)) {
-        console.log('\n┌─────────────────────────────────────────────────────────┐');
-        console.log('│  ⚠️  Agent Builder Pack Detected                         │');
-        console.log('├─────────────────────────────────────────────────────────┤');
-        console.log('│  Found .ai/skills/workflows/agent.                      │');
-        console.log('│  Agent Builder is a large workflow for building agents. │');
-        console.log('│                                                         │');
-        console.log('│  If your project does not need agents, consider removing│');
-        console.log('│  it to reduce repo size and sync time.                  │');
-        console.log('│                                                         │');
-        console.log('│  Removal command:                                       │');
-        console.log('│    node init/.../init-pipeline.mjs prune-agent-builder \\');
-        console.log('│      --repo-root . --apply --i-understand              │');
-        console.log('│                                                         │');
-        console.log('│  Or keep it for future use.                             │');
-        console.log('└─────────────────────────────────────────────────────────┘');
+        console.log('\n[info] Agent Builder pack detected');
+        console.log('- Found: .ai/skills/workflows/agent');
+        console.log('- If not needed, remove it to reduce repo size and sync time:');
+        console.log('  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder --repo-root . --apply --i-understand');
       }
       
-      console.log('\nOptional: run cleanup-init --apply --i-understand --archive to archive and remove init/.');
+      console.log('\nNext steps:');
+      console.log('- Review: README.md and AGENTS.md');
+      console.log('- Optional: archive and remove init/:');
+      console.log('  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --apply --i-understand --archive');
       process.exit(0);
     }
   }
@@ -1376,11 +1551,14 @@ function main() {
     const providers = opts['providers'] || 'both';
     const requireStageA = !!opts['require-stage-a'];
     const skipConfigs = !!opts['skip-configs'];
+    const skipReadme = !!opts['skip-readme'];
+    const skipRootAgents = !!opts['skip-root-agents'];
     const skipAgentBuilder = !!opts['skip-agent-builder'];
     const cleanup = !!opts['cleanup-init'];
     const archiveAll = !!opts['archive'];
     const archiveDocs = !!opts['archive-docs'];
     const archiveBlueprint = !!opts['archive-blueprint'];
+    const archiveDir = opts['archive-dir'];
 
     if (cleanup && !opts['i-understand']) {
       die('[error] --cleanup-init requires --i-understand');
@@ -1429,12 +1607,25 @@ function main() {
       }
     }
 
-    // Generate project-specific README.md
-    const readmeResult = generateProjectReadme(repoRoot, blueprint, true);
-    if (readmeResult.op === 'write' && readmeResult.mode === 'applied') {
-      console.log('[ok] README.md generated from blueprint.');
-    } else if (readmeResult.reason) {
-      console.log(`[info] README.md: ${readmeResult.reason}`);
+    // Generate/update root docs from the blueprint
+    let readmeResult = null;
+    if (!skipReadme) {
+      readmeResult = generateProjectReadme(repoRoot, blueprint, true);
+      if (readmeResult.op === 'write' && readmeResult.mode === 'applied') {
+        console.log('[ok] README.md generated from blueprint.');
+      } else if (readmeResult.reason) {
+        console.log(`[info] README.md: ${readmeResult.reason}`);
+      }
+    }
+
+    let agentsResult = null;
+    if (!skipRootAgents) {
+      agentsResult = generateProjectAgents(repoRoot, blueprint, true);
+      if (agentsResult.op === 'write' && agentsResult.mode === 'applied') {
+        console.log('[ok] AGENTS.md updated from blueprint.');
+      } else if (agentsResult.reason) {
+        console.log(`[info] AGENTS.md: ${agentsResult.reason}`);
+      }
     }
 
     // Manifest update
@@ -1461,6 +1652,7 @@ function main() {
       state[stageKey('C')].configsGenerated = !skipConfigs;
       state[stageKey('C')].manifestUpdated = true;
       state[stageKey('C')].wrappersSynced = syncResult.mode === 'applied';
+      state[stageKey('C')].skillRetentionReviewed = false;
       addHistoryEvent(state, 'stage_c_applied', 'Stage C apply completed');
       saveState(repoRoot, state);
       console.log('[auto] State updated: stage-c.* = true');
@@ -1477,7 +1669,7 @@ function main() {
           repoRoot,
           docsRoot,
           blueprintPath,
-          { archiveDocs: wantsArchiveDocs, archiveBlueprint: wantsArchiveBlueprint },
+          { archiveDocs: wantsArchiveDocs, archiveBlueprint: wantsArchiveBlueprint, archiveDir },
           true
         );
         if (archiveResult.errors.length > 0) {
@@ -1499,6 +1691,7 @@ function main() {
         scaffold: scaffoldPlan,
         configs: configResults,
         readme: readmeResult,
+        agents: agentsResult,
         manifest: manifestResult,
         archive: archiveResult,
         pruneAgentBuilder: pruneResult,
@@ -1516,6 +1709,8 @@ function main() {
       if (pruneResult) console.log(`- Agent workflow prune: ${pruneResult.mode}`);
       console.log(`- Wrappers synced via: ${syncResult.cmd || '(skipped)'}`);
       if (cleanupResult) console.log(`- init/ cleanup: ${cleanupResult.mode}`);
+      console.log('\nNext:');
+      console.log('  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs advance');
     }
 
     process.exit(0);
@@ -1527,6 +1722,7 @@ function main() {
     const archiveAll = !!opts['archive'];
     const archiveDocs = !!opts['archive-docs'];
     const archiveBlueprint = !!opts['archive-blueprint'];
+    const archiveDir = opts['archive-dir'];
     const wantsArchiveDocs = archiveAll || archiveDocs;
     const wantsArchiveBlueprint = archiveAll || archiveBlueprint;
 
@@ -1536,7 +1732,7 @@ function main() {
         repoRoot,
         docsRoot,
         blueprintPath,
-        { archiveDocs: wantsArchiveDocs, archiveBlueprint: wantsArchiveBlueprint },
+        { archiveDocs: wantsArchiveDocs, archiveBlueprint: wantsArchiveBlueprint, archiveDir },
         apply
       );
       if (apply && archiveResult.errors.length > 0) {
@@ -1562,6 +1758,65 @@ function main() {
         }
       }
     }
+    process.exit(0);
+  }
+
+  // ========== review-skill-retention ==========
+  if (command === 'review-skill-retention') {
+    const state = loadState(repoRoot);
+    if (!state) {
+      die('[error] No init state detected. Run "start" first.');
+    }
+
+    const progress = getStageProgress(state);
+    if (progress.stage !== 'C') {
+      die(`[error] Current stage is ${progress.stage}. review-skill-retention is only valid in Stage C.`);
+    }
+    if (!progress[stageKey('C')].wrappersSynced) {
+      die('[error] Stage C not complete yet. Run apply first.');
+    }
+
+    state[stageKey('C')].skillRetentionReviewed = true;
+    addHistoryEvent(state, 'stage_c_skill_retention_reviewed', 'Skill retention reviewed');
+    saveState(repoRoot, state);
+
+    if (format === 'json') {
+      console.log(JSON.stringify({ ok: true, stage: 'C', skillRetentionReviewed: true }, null, 2));
+    } else {
+      console.log('[ok] Stage C skill retention review marked as complete.');
+      console.log('Next:');
+      console.log('  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs advance');
+    }
+
+    process.exit(0);
+  }
+
+  // ========== update-root-docs ==========
+  if (command === 'update-root-docs') {
+    const apply = !!opts['apply'];
+    const skipReadme = !!opts['skip-readme'];
+    const skipRootAgents = !!opts['skip-root-agents'];
+
+    const blueprint = readJson(blueprintPath);
+    const v = validateBlueprint(blueprint);
+    if (!v.ok) die('[error] Blueprint validation failed. Fix errors and re-run.');
+
+    const readmeResult = skipReadme
+      ? { op: 'skip', path: path.join(repoRoot, 'README.md'), reason: '--skip-readme' }
+      : generateProjectReadme(repoRoot, blueprint, apply);
+
+    const agentsResult = skipRootAgents
+      ? { op: 'skip', path: path.join(repoRoot, 'AGENTS.md'), reason: '--skip-root-agents' }
+      : generateProjectAgents(repoRoot, blueprint, apply);
+
+    if (format === 'json') {
+      console.log(JSON.stringify({ ok: true, readme: readmeResult, agents: agentsResult }, null, 2));
+    } else {
+      console.log(apply ? '[ok] Root docs updated.' : '[plan] Root docs update planned (dry-run).');
+      console.log(`- README.md: ${readmeResult.mode || readmeResult.reason || readmeResult.op}`);
+      console.log(`- AGENTS.md: ${agentsResult.mode || agentsResult.reason || agentsResult.op}`);
+    }
+
     process.exit(0);
   }
 

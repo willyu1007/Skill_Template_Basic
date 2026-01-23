@@ -181,15 +181,26 @@ If the user opts out of `agent-builder`, add:
 ```
 
 4. **Self-review**: Complete Stage C checklist in `templates/quality-checklist.md`.
-5. **CHECKPOINT C Complete**: Use prompt from `templates/stage-checkpoints.md` to confirm completion. User will choose one of: "update agents", "cleanup init", or "done".
-6. **(Recommended) Update root AGENTS.md**: If user replies "update agents", update the root `AGENTS.md` with project-specific info **before** running approve. See **Post-init: Update AGENTS.md** section below for rules.
-7. **Approve Stage C**: After handling user's choice (update agents if selected), run:
+5. **CHECKPOINT C Complete**: Use prompt from `templates/stage-checkpoints.md` to confirm completion. User will choose one of: "regen docs", "cleanup init", or "done".
+6. **(Required) Review skill retention**: Confirm which skills to keep vs prune, then mark the review complete:
+
+```bash
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs review-skill-retention --repo-root .
+```
+
+7. **(Recommended) Re-generate root docs**: If user replies "regen docs", (re)generate the root `README.md` + `AGENTS.md` from the blueprint:
+
+```bash
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs update-root-docs --apply
+```
+
+8. **Approve Stage C**: After handling user's choice (regen docs if selected), run:
 
 ```bash
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage C
 ```
 
-8. (Optional) Remove the bootstrap kit if user chose "cleanup init" or explicitly requests later:
+9. (Optional) Remove the bootstrap kit if user chose "cleanup init" or explicitly requests later:
 
 ```bash
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init   --repo-root .   --apply   --i-understand --archive
@@ -202,20 +213,21 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 - Do not edit `.codex/skills/` or `.claude/skills/` directly. Only update SSOT in `.ai/skills/` and run `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`. (The repo's SSOT rule applies.) 
 - Scaffolding MUST NOT overwrite existing files; scaffolding should only create missing directories and small placeholder `README.md` files.
 - **Exception**: The root `README.md` will be replaced with a project-specific version generated from the blueprint. The replacement is intentional — the template README should be replaced with project documentation.
+- The root `AGENTS.md` will be updated from the blueprint (project type, tech stack, key directories) during Stage C apply.
 
 ---
 
-## Post-init: Skill Retention and Pruning (optional)
+## Stage C: Skill Retention Review (required)
 
-After Stage C, you MAY prune unneeded skills using a retention table.
+Before approving Stage C, you MUST review which skills to keep vs prune.
 
 - Start from `templates/skill-retention-table.template.md` and fill the Skill + Description columns in-chat (translate to the user's preferred language if needed). Do NOT save `skill-retention-table.md` as a file.
 - Ask the user to list skills to remove (name or path), then confirm before deleting.
 - Use `node .ai/scripts/delete-skills.mjs --skills "<csv>" --dry-run`, then re-run with `--yes`.
 
-## Post-init: Update AGENTS.md
+## Root AGENTS.md update rules
 
-After Stage C completion, if the user chooses to update the root `AGENTS.md`, follow these rules.
+Stage C `apply` (and `update-root-docs`) updates the root `AGENTS.md` from the blueprint. If manual edits are needed, follow these rules.
 
 ### MUST Preserve (template repo structure)
 

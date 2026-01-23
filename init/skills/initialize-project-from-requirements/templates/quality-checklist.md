@@ -107,18 +107,20 @@ Run the Stage C checklist after `apply` command, **before** cleanup.
 - [ ] Does the generated directory structure match `repo.layout`?
 - [ ] Are placeholder READMEs meaningful (not just "TODO")?
 - [ ] Are no existing files overwritten?
+- [ ] Do `README.md` and `AGENTS.md` reflect the blueprint (project name, stack, directories)?
 
 ### C2. Skills Sync
 
 - [ ] Does `.ai/skills/_meta/sync-manifest.json` reflect `skills.packs`?
 - [ ] Are `.codex/skills/` and `.claude/skills/` wrappers generated?
 - [ ] Can you list the enabled skills and verify they match expectations?
+- [ ] Has skill retention been reviewed and marked (`review-skill-retention`)?
 - [ ] If the user opted out of `agent-builder`, is `.ai/skills/workflows/agent` removed and wrappers re-synced?
 
 ### C3. Cleanup Readiness
 
-- [ ] Are Stage A docs present in `init/stage-a-docs/` (or archived to `docs/project/` if cleanup is requested)?
-- [ ] Is `init/project-blueprint.json` present (or archived to `docs/project/` if cleanup is requested)?
+- [ ] Are Stage A docs present in `init/stage-a-docs/` (or archived to `docs/project/overview/` if cleanup is requested)?
+- [ ] Is `init/project-blueprint.json` present (or archived to `docs/project/overview/` if cleanup is requested)?
 - [ ] Is `.ai/skills/_meta/sync-manifest.json` preserved?
 - [ ] Are you confident the init kit is no longer needed?
 

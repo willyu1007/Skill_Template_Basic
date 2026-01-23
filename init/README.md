@@ -37,7 +37,13 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 # 6. Apply scaffold and wrappers
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both
 
-# 7. Complete initialization
+# 7. Review skill retention (required before Stage C approval)
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs review-skill-retention
+
+# 8. (Optional) Re-generate root README.md + AGENTS.md from blueprint
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs update-root-docs --apply
+
+# 9. Complete initialization
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage C
 ```
 
@@ -64,7 +70,7 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 
 ### Conclusions (read first)
 
-- Stage A produces **human-readable SSOT** for intent under `init/stage-a-docs/` (archive to `docs/project/` after init if needed).
+- Stage A produces **human-readable SSOT** for intent under `init/stage-a-docs/` (archive to `docs/project/overview/` after init if needed; override with `--archive-dir`).
 - Stage B produces **machine-readable SSOT** for automation: `init/project-blueprint.json`.
 - Stage C is deterministic:
   - scaffold directories based on `repo.layout` and enabled capabilities
@@ -163,7 +169,23 @@ node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs 
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs apply --providers both --skip-agent-builder --i-understand
 ```
 
-#### 2.9 `prune-agent-builder`
+#### 2.9 `review-skill-retention`
+
+Mark skill retention as reviewed (required before approving Stage C).
+
+```bash
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs review-skill-retention --repo-root .
+```
+
+#### 2.10 `update-root-docs`
+
+(Re)generate root docs from the blueprint.
+
+```bash
+node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs update-root-docs --apply
+```
+
+#### 2.11 `prune-agent-builder`
 
 Remove `.ai/skills/workflows/agent` after initialization.
 
@@ -171,9 +193,9 @@ Remove `.ai/skills/workflows/agent` after initialization.
 node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs prune-agent-builder --apply --i-understand
 ```
 
-#### 2.10 `cleanup-init`
+#### 2.12 `cleanup-init`
 
-Remove the init kit (optionally archive to `docs/project/` first).
+Remove the init kit (optionally archive to `docs/project/overview/` first).
 
 ```bash
 # Dry-run
@@ -236,5 +258,5 @@ Given `--docs-root <path>` (default: `init/stage-a-docs`), it checks:
 ### 6. Cleanup safety rules
 
 - `cleanup-init` refuses to run unless `init/.init-kit` exists.
-- Use `--archive` to copy init inputs into `docs/project/` before cleanup.
+- Use `--archive` to copy init inputs into `docs/project/overview/` before cleanup (or override with `--archive-dir`).
 - On some platforms, the script renames `init/` to `.init-trash-<timestamp>` before deletion.

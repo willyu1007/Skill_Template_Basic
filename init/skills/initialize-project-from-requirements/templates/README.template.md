@@ -6,10 +6,17 @@
 **Domain:** {{DOMAIN}}
 {{/DOMAIN}}
 
+## Quick Start
+
+| For | Action |
+|-----|--------|
+| **AI Assistants** | Read `AGENTS.md` -> Follow routing |
+| **Humans** | Read `docs/project/overview/` -> Project overview |
+
 ## Tech Stack
 
-| Category | Technology |
-|----------|------------|
+| Category | Value |
+|----------|-------|
 | Language | {{LANGUAGE}} |
 | Package Manager | {{PACKAGE_MANAGER}} |
 | Layout | {{REPO_LAYOUT}} |
@@ -41,11 +48,6 @@
 ### Installation
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd {{PROJECT_NAME}}
-
-# Install dependencies
 {{INSTALL_COMMAND}}
 ```
 
@@ -55,15 +57,27 @@ cd {{PROJECT_NAME}}
 {{DEV_COMMAND}}
 ```
 
-## Project Structure
+### Tests
+
+```bash
+{{TEST_COMMAND}}
+```
+
+## What's Inside
 
 ```
 {{PROJECT_STRUCTURE}}
 ```
 
-## Skills & AI Assistance
+{{#HAS_INIT_KIT}}
+## Initialization (Bootstrap Kit)
 
-This project uses the AI-Friendly Repository pattern:
+- Human guide: `init/README.md`
+- LLM instructions: `init/AGENTS.md`
+- Optional cleanup (after archiving): `node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --apply --i-understand --archive`
+{{/HAS_INIT_KIT}}
+
+## Skill Entry Points
 
 - **SSOT Skills**: `.ai/skills/` — Edit skills here only
 - **Generated Wrappers**: `.codex/skills/`, `.claude/skills/` — Do NOT edit directly
@@ -74,13 +88,7 @@ Regenerate wrappers after skill changes:
 node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes
 ```
 
-## Contributing
+## Documentation
 
-1. Create a feature branch
-2. Make your changes
-3. Run tests: `{{TEST_COMMAND}}`
-4. Submit a pull request
-
-## License
-
-[Add your license here]
+- Project overview + archived init SSOT (optional): `docs/project/overview/`
+- Dev docs pattern: `dev-docs/README.md`

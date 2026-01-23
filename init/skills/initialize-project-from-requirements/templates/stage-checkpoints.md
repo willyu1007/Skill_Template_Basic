@@ -146,16 +146,20 @@ Initialization is complete.
 
 ### Next steps
 
-1. **Update AGENTS.md (recommended)**: Record project type and tech stack in root `AGENTS.md`
-2. Archive docs (optional): to keep Stage A docs and blueprint in `docs/project/`, run:
+1. Review skill retention (keep vs prune). If you want changes, list skills to remove and we will prune them.
+2. Mark retention review complete (required before Stage C approval):
+   node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs review-skill-retention --repo-root .
+3. Review root docs: `README.md` and `AGENTS.md` (generated from `init/project-blueprint.json`)
+4. Regenerate root docs (optional):
+   node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs update-root-docs --apply
+5. Archive + remove init kit (optional): to keep Stage A docs and blueprint in `docs/project/overview/`, run:
    node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs cleanup-init --repo-root . --apply --i-understand --archive
-3. Cleanup init (optional): removes the initialization kit after archiving
-4. Start development: you can now use the enabled skills
+6. Start development: you can now use the enabled skills
 
 ### Confirm completion
 
 Reply with one of:
-- "update agents" - I will help you update the root AGENTS.md with project info
+- "regen docs" - Re-generate root README.md + AGENTS.md from the blueprint
 - "cleanup init" - Archive docs and remove the init kit
 - "done" - Complete initialization without further changes
 ```
@@ -163,15 +167,13 @@ Reply with one of:
 ### AI MUST
 
 - Wait for explicit user confirmation
-- If user says "update agents":
-  1. Read current root `AGENTS.md`
-  2. Preserve template repo structure (Key Directories table, Routing table, Global Rules)
-  3. Add project-specific info from blueprint:
-     - Project Type section (name + one-line description)
-     - Tech Stack table (language, package manager, layout, frameworks)
-     - Update Key Directories with project-specific paths
-  4. Follow LLM-friendly doc rules: moderate semantic density, structured tables, token-efficient
-  5. Show diff to user before applying
+- If user says "regen docs":
+  1. Run `node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs update-root-docs --apply`
+  2. Ask the user to review `README.md` and `AGENTS.md`
+- Before Stage C approval, run:
+  ```bash
+  node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs review-skill-retention --repo-root .
+  ```
 - Once user confirms, run:
   ```bash
   node init/skills/initialize-project-from-requirements/scripts/init-pipeline.mjs approve --stage C

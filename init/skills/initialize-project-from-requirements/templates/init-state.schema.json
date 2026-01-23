@@ -100,6 +100,7 @@
         "configsGenerated",
         "manifestUpdated",
         "wrappersSynced",
+        "skillRetentionReviewed",
         "userApproved"
       ],
       "properties": {
@@ -107,6 +108,7 @@
         "configsGenerated": { "type": "boolean" },
         "manifestUpdated": { "type": "boolean" },
         "wrappersSynced": { "type": "boolean" },
+        "skillRetentionReviewed": { "type": "boolean" },
         "userApproved": { "type": "boolean" }
       }
     },
