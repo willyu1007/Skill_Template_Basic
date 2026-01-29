@@ -110,12 +110,6 @@ node init/_tools/init.mjs approve --stage C
 | `INIT-BOARD.md` | INIT-BOARD (LLM-owned; pipeline updates only MACHINE_SNAPSHOT) |
 | `AGENTS.md` | LLM instructions |
 
-## Migrating From Legacy Outputs
-
-```bash
-node init/_tools/init.mjs migrate-workdir --apply
-```
-
 ## Post-init Cleanup
 
 ```bash
@@ -163,7 +157,6 @@ All commands: `node init/_tools/init.mjs <cmd> [options]`
 | `update-root-docs` | Regenerate README/AGENTS | `--apply` |
 | `prune-agent-builder` | Remove agent workflow | `--apply --i-understand` |
 | `cleanup-init` | Remove init kit | `--apply --i-understand --archive` |
-| `migrate-workdir` | Migrate legacy paths | `--apply` |
 | `update-board` | Refresh INIT-BOARD.md | `--apply` |
 
 For full option details, run: `node init/_tools/init.mjs --help`

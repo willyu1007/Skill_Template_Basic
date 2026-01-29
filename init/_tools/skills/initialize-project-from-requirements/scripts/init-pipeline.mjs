@@ -20,7 +20,6 @@
  *   - apply          validate + (optional) check-docs + scaffold + configs + manifest update + wrapper sync
  *   - cleanup-init   Remove the `init/` bootstrap kit (opt-in, guarded)
  *   - review-skill-retention  Mark Stage C skill retention as reviewed
- *   - migrate-workdir Move legacy init outputs into init/_work (optional)
  *   - update-intake  Update init/START-HERE.md (intake doc; LLM-maintained blocks)
  *   - update-board   Update init/INIT-BOARD.md (LLM-owned; pipeline updates only the machine snapshot block)
  *   - update-root-docs  Generate/update root README.md and AGENTS.md from the blueprint
@@ -38,7 +37,7 @@
  *   - Blueprint & packs: validate + suggest-packs (Stage B)
  *   - Scaffold + configs + docs: scaffold/apply/update-root-docs (Stage C)
  *   - Manifest + wrappers: sync-manifest.json + sync-skills.mjs
- *   - Cleanup & archive: cleanup-init, migrate-workdir
+ *   - Cleanup & archive: cleanup-init
  *   - Main CLI: command dispatch and execution
  *
  * Modularization Note:
@@ -141,12 +140,6 @@ Commands:
     --repo-root <path>          Repo root (default: cwd)
     Mark Stage C skill retention as reviewed (required before approving Stage C).
 
-  migrate-workdir
-    --repo-root <path>          Repo root (default: cwd)
-    --apply                      Actually move legacy paths (default: dry-run)
-    Move legacy init outputs (init/.init-state.json, init/stage-a-docs/, init/project-blueprint.json)
-    into init/_work/ (non-destructive; refuses to overwrite).
-
   update-intake
     --repo-root <path>          Repo root (default: cwd)
     --blueprint <path>          Blueprint JSON path (default: <repo-root>/init/_work/project-blueprint.json)
@@ -188,7 +181,6 @@ Examples:
   node init/_tools/init.mjs approve --stage A
   node init/_tools/init.mjs apply --blueprint init/_work/project-blueprint.json --providers codex,claude
   node init/_tools/init.mjs review-skill-retention
-  node init/_tools/init.mjs migrate-workdir --apply
   node init/_tools/init.mjs update-intake --apply
   node init/_tools/init.mjs update-board --apply
   node init/_tools/init.mjs update-root-docs --apply
@@ -242,31 +234,14 @@ const STAGE_A_DOCS_DEFAULT_REL = path.join(INIT_WORK_DEFAULT_REL, 'stage-a-docs'
 const BLUEPRINT_DEFAULT_REL = path.join(INIT_WORK_DEFAULT_REL, 'project-blueprint.json');
 const INIT_STATE_DEFAULT_REL = path.join(INIT_WORK_DEFAULT_REL, '.init-state.json');
 
-const LEGACY_STAGE_A_DOCS_REL = path.join('init', 'stage-a-docs');
-const LEGACY_BLUEPRINT_REL = path.join('init', 'project-blueprint.json');
-const LEGACY_INIT_STATE_REL = path.join('init', '.init-state.json');
-
 function resolveDocsRoot(repoRoot, provided) {
   if (provided) return resolvePath(repoRoot, provided);
-  const modern = path.join(repoRoot, STAGE_A_DOCS_DEFAULT_REL);
-  const legacy = path.join(repoRoot, LEGACY_STAGE_A_DOCS_REL);
-  if (!fs.existsSync(modern) && fs.existsSync(legacy)) return legacy;
-  return modern;
+  return path.join(repoRoot, STAGE_A_DOCS_DEFAULT_REL);
 }
 
 function resolveBlueprintPath(repoRoot, provided) {
   if (provided) return resolvePath(repoRoot, provided);
-  const modern = path.join(repoRoot, BLUEPRINT_DEFAULT_REL);
-  const legacy = path.join(repoRoot, LEGACY_BLUEPRINT_REL);
-  if (!fs.existsSync(modern) && fs.existsSync(legacy)) return legacy;
-  return modern;
-}
-
-function resolveInitStatePath(repoRoot) {
-  const modern = path.join(repoRoot, INIT_STATE_DEFAULT_REL);
-  const legacy = path.join(repoRoot, LEGACY_INIT_STATE_REL);
-  if (!fs.existsSync(modern) && fs.existsSync(legacy)) return legacy;
-  return modern;
+  return path.join(repoRoot, BLUEPRINT_DEFAULT_REL);
 }
 
 function readJson(filePath) {
@@ -310,27 +285,13 @@ const SCRIPT_DIR = __dirname;
 const TEMPLATES_DIR = path.join(SCRIPT_DIR, '..', 'templates');
 
 function getStatePath(repoRoot) {
-  return resolveInitStatePath(repoRoot);
+  return path.join(repoRoot, INIT_STATE_DEFAULT_REL);
 }
 
 function stageKey(letter) {
   const l = String(letter || '').toLowerCase();
   if (!l) return '';
   return `stage-${l}`;
-}
-
-function normalizeStateShape(state) {
-  if (!state || typeof state !== 'object') return state;
-
-  // Migrate legacy camel-case stage keys -> kebab-case stage-* keys.
-  for (const stageLetter of ['A', 'B', 'C']) {
-    const legacyKey = `stage${stageLetter}`;
-    const newKey = stageKey(stageLetter);
-    if (state[legacyKey] && !state[newKey]) state[newKey] = state[legacyKey];
-    if (state[legacyKey]) delete state[legacyKey];
-  }
-
-  return state;
 }
 
 function createInitialState() {
@@ -399,7 +360,7 @@ function loadState(repoRoot) {
     return null;
   }
   try {
-    return normalizeStateShape(JSON.parse(stripUtf8Bom(fs.readFileSync(statePath, 'utf8'))));
+    return JSON.parse(stripUtf8Bom(fs.readFileSync(statePath, 'utf8')));
   } catch (e) {
     console.error(`[warn] Failed to parse state file: ${e.message}`);
     return null;
@@ -547,69 +508,12 @@ function printStatus(state, repoRoot, { docsRoot, blueprintPath } = {}) {
 // ============================================================================
 
 const START_HERE_DEFAULT_REL = path.join('init', 'START-HERE.md');
-const START_HEERE_LEGACY_REL = path.join('init', 'START-HEERE.md');
 const INIT_BOARD_DEFAULT_REL = path.join('init', 'INIT-BOARD.md');
 
 const INIT_KIT_MARKER_DEFAULT_REL = path.join('init', '_tools', '.init-kit');
-const INIT_KIT_MARKER_LEGACY_REL = path.join('init', '.init-kit');
 
 function toPosixPath(p) {
   return String(p || '').replace(/\\/g, '/');
-}
-
-function detectWorkdirMode(repoRoot, docsRoot, blueprintPath, statePath) {
-  const docsRel = toPosixPath(path.relative(repoRoot, docsRoot));
-  const blueprintRel = toPosixPath(path.relative(repoRoot, blueprintPath));
-  const stateRel = toPosixPath(path.relative(repoRoot, statePath));
-
-  const modern = {
-    docs: toPosixPath(STAGE_A_DOCS_DEFAULT_REL),
-    blueprint: toPosixPath(BLUEPRINT_DEFAULT_REL),
-    state: toPosixPath(INIT_STATE_DEFAULT_REL)
-  };
-  const legacy = {
-    docs: toPosixPath(LEGACY_STAGE_A_DOCS_REL),
-    blueprint: toPosixPath(LEGACY_BLUEPRINT_REL),
-    state: toPosixPath(LEGACY_INIT_STATE_REL)
-  };
-
-  const legacyUsed = [];
-  if (docsRel === legacy.docs) legacyUsed.push(legacy.docs);
-  if (blueprintRel === legacy.blueprint) legacyUsed.push(legacy.blueprint);
-  if (stateRel === legacy.state) legacyUsed.push(legacy.state);
-
-  const modernUsed = [];
-  if (docsRel === modern.docs) modernUsed.push(modern.docs);
-  if (blueprintRel === modern.blueprint) modernUsed.push(modern.blueprint);
-  if (stateRel === modern.state) modernUsed.push(modern.state);
-
-  let mode = 'custom';
-  if (legacyUsed.length > 0 && modernUsed.length > 0) mode = 'mixed';
-  else if (legacyUsed.length > 0) mode = 'legacy';
-  else if (modernUsed.length === 3) mode = 'modern';
-
-  return {
-    mode,
-    docsRel,
-    blueprintRel,
-    stateRel,
-    legacyUsed,
-    modernUsed
-  };
-}
-
-function warnLegacyWorkdirIfNeeded(repoRoot, docsRoot, blueprintPath, statePath) {
-  const diag = detectWorkdirMode(repoRoot, docsRoot, blueprintPath, statePath);
-  if (diag.legacyUsed.length === 0) return;
-
-  const paths = diag.legacyUsed.map((p) => `\`${p}\``).join(', ');
-  const cmd = 'node init/_tools/init.mjs migrate-workdir --apply --repo-root .';
-
-  console.error(`[warn] Legacy init workdir path(s) detected: ${paths}`);
-  if (diag.mode === 'mixed') {
-    console.error('[warn] Some init paths resolve to legacy while others resolve to modern.');
-  }
-  console.error(`[warn] Recommended: migrate outputs into \`init/_work/\`:\n       ${cmd}`);
 }
 
 // ============================================================================
@@ -965,21 +869,9 @@ function tryAutoUpdateInitBoardDoc(repoRoot, docsRoot, blueprintPath, options = 
     const language = getStateLanguage(state);
     if (!language) return;
 
-    // Keep the intake doc in a consistent shape (preserve LLM blocks; migrate legacy name if needed).
+    // Keep the intake doc in a consistent shape (preserve LLM blocks).
     const startHerePath = path.join(repoRoot, START_HERE_DEFAULT_REL);
-    const startHeereLegacyPath = path.join(repoRoot, START_HEERE_LEGACY_REL);
-
-    if (apply && !fs.existsSync(startHerePath) && fs.existsSync(startHeereLegacyPath)) {
-      try {
-        fs.renameSync(startHeereLegacyPath, startHerePath);
-      } catch (e) {
-        // Fall back to copy-on-write via updateStartHeereDoc (preserves LLM blocks).
-        console.warn(`[warn] Failed to migrate legacy START-HEERE.md -> START-HERE.md: ${e.message}`);
-      }
-    }
-
-    const sourcePath = !fs.existsSync(startHerePath) && fs.existsSync(startHeereLegacyPath) ? startHeereLegacyPath : null;
-    updateStartHeereDoc({ repoRoot, docsRoot, blueprintPath, intakePath: startHerePath, sourcePath, apply });
+    updateStartHeereDoc({ repoRoot, docsRoot, blueprintPath, intakePath: startHerePath, sourcePath: null, apply });
 
     const res = updateInitBoardDoc({
       repoRoot,
@@ -1427,9 +1319,7 @@ function generateProjectReadme(repoRoot, blueprint, apply) {
   conditionalBlock('IS_PYTHON', 'true', isPython);
   conditionalBlock('IS_GO', 'true', isGo);
 
-  const hasInitKit =
-    fs.existsSync(path.join(repoRoot, INIT_KIT_MARKER_DEFAULT_REL)) ||
-    fs.existsSync(path.join(repoRoot, INIT_KIT_MARKER_LEGACY_REL));
+  const hasInitKit = fs.existsSync(path.join(repoRoot, INIT_KIT_MARKER_DEFAULT_REL));
   conditionalBlock('HAS_INIT_KIT', 'true', hasInitKit);
   
   // Install and dev commands based on package manager
@@ -1870,19 +1760,6 @@ function copyFile(src, dest, apply) {
   }
 }
 
-function movePath(src, dest, apply) {
-  if (!fs.existsSync(src)) return { op: 'mv', src, dest, mode: 'skip', reason: 'missing source' };
-  if (fs.existsSync(dest)) return { op: 'mv', src, dest, mode: 'skip', reason: 'destination exists' };
-  if (!apply) return { op: 'mv', src, dest, mode: 'dry-run' };
-  try {
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.renameSync(src, dest);
-    return { op: 'mv', src, dest, mode: 'applied' };
-  } catch (e) {
-    return { op: 'mv', src, dest, mode: 'failed', error: e.message };
-  }
-}
-
 function archiveInitArtifacts(repoRoot, docsRoot, blueprintPath, options, apply) {
   const targetRoot = resolvePath(repoRoot, (options && options.archiveDir) || path.join('docs', 'project', 'overview'));
   const actions = [];
@@ -1925,11 +1802,9 @@ function archiveInitArtifacts(repoRoot, docsRoot, blueprintPath, options, apply)
 function cleanupInit(repoRoot, apply) {
   const initDir = path.join(repoRoot, 'init');
   const markerDefault = path.join(repoRoot, INIT_KIT_MARKER_DEFAULT_REL);
-  const markerLegacy = path.join(repoRoot, INIT_KIT_MARKER_LEGACY_REL);
-  const marker = fs.existsSync(markerDefault) ? markerDefault : (fs.existsSync(markerLegacy) ? markerLegacy : null);
 
   if (!fs.existsSync(initDir)) return { op: 'skip', path: initDir, reason: 'init/ not present' };
-  if (!marker) return { op: 'refuse', path: initDir, reason: 'missing init/_tools/.init-kit marker' };
+  if (!fs.existsSync(markerDefault)) return { op: 'refuse', path: initDir, reason: 'missing init/_tools/.init-kit marker' };
 
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
   const trashDir = path.join(repoRoot, `.init-trash-${ts}`);
@@ -1962,10 +1837,6 @@ function main() {
   const docsRoot = resolveDocsRoot(repoRoot, opts['docs-root']);
   const blueprintPath = resolveBlueprintPath(repoRoot, opts['blueprint']);
   const statePath = getStatePath(repoRoot);
-
-  if (command !== 'migrate-workdir') {
-    warnLegacyWorkdirIfNeeded(repoRoot, docsRoot, blueprintPath, statePath);
-  }
 
   // ========== start ==========
   if (command === 'start') {
@@ -2043,50 +1914,6 @@ function main() {
     process.exit(0);
   }
 
-  // ========== migrate-workdir ==========
-  if (command === 'migrate-workdir') {
-    const apply = !!opts['apply'];
-
-    const legacyState = path.join(repoRoot, LEGACY_INIT_STATE_REL);
-    const legacyDocs = path.join(repoRoot, LEGACY_STAGE_A_DOCS_REL);
-    const legacyBlueprint = path.join(repoRoot, LEGACY_BLUEPRINT_REL);
-
-    const modernState = path.join(repoRoot, INIT_STATE_DEFAULT_REL);
-    const modernDocs = path.join(repoRoot, STAGE_A_DOCS_DEFAULT_REL);
-    const modernBlueprint = path.join(repoRoot, BLUEPRINT_DEFAULT_REL);
-
-    const actions = [
-      movePath(legacyState, modernState, apply),
-      movePath(legacyDocs, modernDocs, apply),
-      movePath(legacyBlueprint, modernBlueprint, apply)
-    ];
-
-    const failed = actions.filter((a) => a.mode === 'failed');
-
-    if (format === 'json') {
-      console.log(JSON.stringify({ ok: failed.length === 0, actions }, null, 2));
-    } else {
-      const label = apply ? '[ok]' : '[plan]';
-      console.log(`${label} migrate-workdir (${apply ? 'apply' : 'dry-run'})`);
-      for (const a of actions) {
-        const srcRel = toPosixPath(path.relative(repoRoot, a.src || ''));
-        const destRel = toPosixPath(path.relative(repoRoot, a.dest || ''));
-        const mode = a.mode ? ` (${a.mode})` : '';
-        const reason = a.reason ? ` [${a.reason}]` : '';
-        const err = a.error ? ` [error: ${a.error}]` : '';
-        console.log(`- ${a.op}: ${srcRel} -> ${destRel}${mode}${reason}${err}`);
-      }
-    }
-
-    if (apply && failed.length === 0) {
-      const nextDocsRoot = resolveDocsRoot(repoRoot, null);
-      const nextBlueprintPath = resolveBlueprintPath(repoRoot, null);
-      tryAutoUpdateInitBoardDoc(repoRoot, nextDocsRoot, nextBlueprintPath, { apply: true, silent: format === 'json' });
-    }
-
-    process.exit(failed.length === 0 ? 0 : 1);
-  }
-
   // ========== update-intake ==========
   if (command === 'update-intake') {
     const apply = !!opts['apply'];
@@ -2099,19 +1926,13 @@ function main() {
     }
 
     const intakePath = resolvePath(repoRoot, opts['path'] || START_HERE_DEFAULT_REL);
-    const startHerePath = path.join(repoRoot, START_HERE_DEFAULT_REL);
-    const startHeereLegacyPath = path.join(repoRoot, START_HEERE_LEGACY_REL);
-    const sourcePath =
-      !fs.existsSync(intakePath) && intakePath === startHerePath && fs.existsSync(startHeereLegacyPath)
-        ? startHeereLegacyPath
-        : null;
 
     const res = updateStartHeereDoc({
       repoRoot,
       docsRoot,
       blueprintPath,
       intakePath,
-      sourcePath,
+      sourcePath: null,
       apply
     });
 
@@ -2142,17 +1963,7 @@ function main() {
 
     if (apply) {
       const startHerePath = path.join(repoRoot, START_HERE_DEFAULT_REL);
-      const startHeereLegacyPath = path.join(repoRoot, START_HEERE_LEGACY_REL);
-      if (!fs.existsSync(startHerePath) && fs.existsSync(startHeereLegacyPath)) {
-        try {
-          fs.renameSync(startHeereLegacyPath, startHerePath);
-        } catch (e) {
-          console.warn(`[warn] Failed to migrate legacy START-HEERE.md -> START-HERE.md: ${e.message}`);
-        }
-      }
-      const sourcePath =
-        !fs.existsSync(startHerePath) && fs.existsSync(startHeereLegacyPath) ? startHeereLegacyPath : null;
-      updateStartHeereDoc({ repoRoot, docsRoot, blueprintPath, intakePath: startHerePath, sourcePath, apply: true });
+      updateStartHeereDoc({ repoRoot, docsRoot, blueprintPath, intakePath: startHerePath, sourcePath: null, apply: true });
     }
 
     const res = updateInitBoardDoc({
