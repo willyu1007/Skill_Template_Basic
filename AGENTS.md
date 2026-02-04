@@ -20,6 +20,7 @@ Template repository. Users clone the repo to start new AI-friendly projects.
 |-----------|-------------|
 | **First time / Project setup** | `init/AGENTS.md` |
 | **Skill authoring / maintenance** | `.ai/AGENTS.md` |
+| **Project governance / progress** | `.ai/project/AGENTS.md` |
 | **LLM engineering** | `.ai/llm-config/AGENTS.md` |
 | **Complex task documentation** | `dev-docs/AGENTS.md` |
 
@@ -47,4 +48,3 @@ Template repository. Users clone the repo to start new AI-friendly projects.
 - NEVER create/copy/clone this repository into any subdirectory of itself (no nested repo copies).
 - Create throwaway test repos **outside** the repo root (OS temp or a sibling directory) and delete them after verification.
 - Keep temporary workspaces shallow: if a path is getting deeply nested or has exceeded **12 path segments** total;, stop and clean up instead of continuing.
-

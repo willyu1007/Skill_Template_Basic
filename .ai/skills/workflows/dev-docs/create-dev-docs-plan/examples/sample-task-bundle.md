@@ -3,7 +3,7 @@
 ## Directory structure
 
 ```
-dev/
+dev-docs/
   active/
     add-export-endpoint/
       00-overview.md

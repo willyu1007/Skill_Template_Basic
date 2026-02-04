@@ -64,7 +64,7 @@ dev-docs/active/<task-slug>/
 1. Create `dev-docs/active/<task-slug>/`.
 2. Write `00-overview.md`:
    - problem statement
-   - status (`planned | in-progress | blocked | done`) + next concrete step
+   - status (`planned` / `in-progress` / `blocked` / `done`) as a single value + next concrete step
    - goal
    - non-goals
    - high-level acceptance criteria
