@@ -30,6 +30,16 @@ variables:
     - pnpm config set store-dir .pnpm-store
     - pnpm install --frozen-lockfile
 
+project-governance:
+  stage: test
+  image: node:${NODE_VERSION}
+  timeout: 5 minutes
+  script:
+    - node .ai/scripts/projectctl.mjs lint --check --project main
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 api-newman:
   <<: *node-setup
   stage: test
