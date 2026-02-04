@@ -123,3 +123,6 @@ node .ai/scripts/projectctl.mjs sync --dry-run --project main --init-if-missing
 node .ai/scripts/lint-skills.mjs --strict
 node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes
 ```
+
+Smoke test (validated in a temporary repo outside the template root):
+- `projectctl sync --apply --init-if-missing` creates the hub, allocates `T-xxx`, upserts `registry.yaml`, and regenerates derived views.
