@@ -15,6 +15,9 @@
 
 ## Routing
 
+- If the task is **project governance / project-level progress** (milestones/features/requirements/tasks mapping, dedupe/triage, project hub sync/lint):
+  - Open: `.ai/project/AGENTS.md`
+  - Use skills: `project-orchestrator`, `project-sync-lint`
 - If the task is **LLM engineering** (provider integration, calling wrappers, profiles, prompts, cost/telemetry, credentials/config keys):
   - Open: `.ai/llm-config/AGENTS.md`
   - Invoke workflow skill: `llm-engineering`
