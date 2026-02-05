@@ -9,14 +9,26 @@ This file is the entry point for AI agents working with **project-level** govern
 node .ai/scripts/projectctl.mjs init --project main
 ```
 
-2) Run lint (CI-friendly; warnings do not fail the job):
+2) Query tasks (LLM-friendly JSON lines; works even if hub is missing):
+```bash
+node .ai/scripts/projectctl.mjs query --project main --text "sync"
+node .ai/scripts/projectctl.mjs query --project main --status in-progress
+node .ai/scripts/projectctl.mjs query --project main --id T-001
+```
+
+3) Run lint (CI-friendly; warnings do not fail the job):
 ```bash
 node .ai/scripts/projectctl.mjs lint --check --project main
 ```
 
-3) Sync/fix drift (manual):
+4) Sync/fix drift (manual):
 ```bash
 node .ai/scripts/projectctl.mjs sync --apply --project main
+```
+
+Optional: append sync-detected events to changelog (append-only):
+```bash
+node .ai/scripts/projectctl.mjs sync --apply --project main --changelog
 ```
 
 ## What to use when
@@ -45,4 +57,3 @@ Missing `.ai-task.yaml` is allowed (warning) during migration, but any existing 
 
 ## Contract
 All behavior MUST follow `.ai/project/CONTRACT.md`.
-

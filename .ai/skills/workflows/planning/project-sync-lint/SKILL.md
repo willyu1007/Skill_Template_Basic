@@ -39,6 +39,11 @@ node .ai/scripts/projectctl.mjs sync --dry-run --project main
 node .ai/scripts/projectctl.mjs sync --apply --project main
 ```
 
+Optional: append sync-detected events to the hub changelog (append-only; apply-mode only):
+```bash
+node .ai/scripts/projectctl.mjs sync --apply --project main --changelog
+```
+
 ## Contract highlights (read the full contract)
 - Task progress SoT: task bundle `00-overview.md` `State:`
 - Task identity SoT: `.ai-task.yaml` `task_id`

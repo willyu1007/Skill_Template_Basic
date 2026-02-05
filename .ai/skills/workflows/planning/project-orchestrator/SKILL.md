@@ -39,7 +39,10 @@ Avoid using this skill for purely local implementation within an already-scoped 
    - Run lint for sanity if needed:
      - `node .ai/scripts/projectctl.mjs lint --check --project main`
 3. Search for related work:
-   - Look for matching Features/Requirements/Tasks in `registry.yaml`
+   - Prefer using `projectctl query` first (LLM-friendly output):
+     - `node .ai/scripts/projectctl.mjs query --project main --text "<keywords>"`
+     - `node .ai/scripts/projectctl.mjs query --project main --status in-progress`
+   - If hub is missing, `query` falls back to scanning `dev-docs/**`
    - Cross-check existing task bundles under `dev-docs/**` when needed
 4. Decide: reuse an existing Task vs propose a new Task.
 5. If a new Task is needed:
@@ -50,7 +53,7 @@ Avoid using this skill for purely local implementation within an already-scoped 
      - Run: `node .ai/scripts/projectctl.mjs sync --apply --project main`
 6. Update project hub semantics (when needed):
    - Update `registry.yaml` to map Milestone/Feature/Requirement <-> Task
-   - Append a human-readable event to `changelog.md`
+   - Changelog: prefer `projectctl sync --apply --changelog` for registration/status events; add manual entries only for non-status events
 7. Regenerate derived views (optional, but recommended after mapping changes):
    - `node .ai/scripts/projectctl.mjs sync --apply --project main`
 

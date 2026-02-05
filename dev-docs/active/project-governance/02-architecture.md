@@ -16,7 +16,7 @@ Introduce a repo-level project governance layer that aggregates progress and map
   - `project-orchestrator`: front-door triage/dedupe/mapping; updates project hub docs/registry; does not implement code changes.
   - `project-sync-lint`: governance tool workflow; runs init/lint/sync via `projectctl.mjs`.
 - Script:
-  - `node .ai/scripts/projectctl.mjs`: implements `init`, `lint`, and `sync` in a dependency-free way.
+  - `node .ai/scripts/projectctl.mjs`: implements `init`, `lint`, `sync`, and `query` in a dependency-free way.
 - Templates:
   - Hub templates under `project-sync-lint/templates/main/` for `init` to copy into `.ai/project/<project>/`.
 
@@ -29,6 +29,8 @@ Introduce a repo-level project governance layer that aggregates progress and map
   - `projectctl init --project <slug>`
   - `projectctl lint --check --project <slug>`
   - `projectctl sync --apply|--dry-run --project <slug>`
+  - `projectctl sync --apply --project <slug> --changelog` (append-only changelog events)
+  - `projectctl query --project <slug> --text "<keywords>"`
 
 ### Boundaries & dependency rules
 - Allowed dependencies:

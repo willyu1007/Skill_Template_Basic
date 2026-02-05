@@ -21,6 +21,8 @@ This template repo now includes a **project-level governance layer** that aggreg
   - `init`: create `.ai/project/<project>/` from templates (idempotent by default)
   - `lint`: validate contract invariants, scan multi-root `dev-docs`, detect drift
   - `sync`: allocate missing `T-xxx` IDs, upsert registry tasks, regenerate derived views
+  - `sync --changelog`: optional append-only changelog entries for registration/status events
+  - `query`: LLM-friendly task lookup (JSONL), fallback scan when hub is missing
 
 ### CI templates are now “governance-aware”
 The templates copied by `node .ai/scripts/cictl.mjs init --provider <github|gitlab>` now include a governance lint job/step:
@@ -97,8 +99,8 @@ Routing was updated to make the governance entrypoint discoverable:
 - **Slug conflicts across roots:** `lint` errors if the same slug appears in multiple roots with different task IDs (prevents semantic drift).
 
 ### Known limitations / gaps (relative to a “fully automated” PM system)
-- `projectctl sync` does not append semantic events to `changelog.md` (manual via `project-orchestrator`).
-- `projectctl` does not provide a `query`/`search` command; natural-language “find related tasks” relies on the LLM reading `registry.yaml` and `dev-docs/**`.
+- `sync --changelog` only appends **registration/status** events; other project events still require manual entries.
+- `projectctl query` reads from the registry when present; if the registry is stale, run `projectctl sync` first.
 - `registry.yaml` is rewritten by `sync` (comments/formatting are not preserved). Treat `registry.yaml` as machine-managed/LLM-managed SSOT.
 
 ## Requirement Coverage Assessment (Project-Level Progress Governance)
@@ -111,8 +113,8 @@ Routing was updated to make the governance entrypoint discoverable:
 - **CI integration:** governance lint runs in CI templates copied by `cictl.mjs`.
 
 ### Partially covered (requires LLM/operator conventions)
-- **Natural-language intake → mapping:** covered by `project-orchestrator` skill, but there is no dedicated CLI query/search tool.
-- **Live documentation protocol:** `sync` regenerates derived views and updates `registry.yaml`, but `changelog.md` updates remain manual.
+- **Natural-language intake → mapping:** `project-orchestrator` plus `projectctl query` provide mechanical search, but mapping decisions remain LLM/operator-driven.
+- **Live documentation protocol:** `sync` regenerates derived views and updates `registry.yaml`, but non-status project events still need manual changelog entries.
 
 ## Verification (Template Repo)
 Commands that should work in this template repo (no hub is created by default):

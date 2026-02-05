@@ -2,7 +2,7 @@
 
 ## Status
 - Current status: `in-progress`
-- Last updated: 2026-02-03
+- Last updated: 2026-02-05
 
 ## What changed
 - Started implementation after aligning SoT rules:
@@ -18,7 +18,7 @@
   - `project-sync-lint` (with hub templates)
 
 - Added a dependency-free governance script:
-  - `.ai/scripts/projectctl.mjs` (init/lint/sync)
+  - `.ai/scripts/projectctl.mjs` (init/lint/sync/query + optional sync --changelog)
 
 - Updated CI templates used by `cictl.mjs` to include a governance lint step.
 

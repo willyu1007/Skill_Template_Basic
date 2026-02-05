@@ -82,7 +82,17 @@ Commands:
     --dry-run                 Print planned changes without writing
     --apply                   Apply changes (writes files)
     --init-if-missing         Create missing hub files from templates before syncing
+    --changelog               Append sync-detected events to hub changelog (apply-mode only)
     Generate missing task meta IDs, upsert registry tasks, and regenerate derived views.
+
+  query
+    --repo-root <path>        Repo root (default: auto-detect; fallback: cwd)
+    --project <slug>          Project slug (default: ${DEFAULT_PROJECT})
+    --id <T-###>              Filter by a specific task id
+    --status <status>         Filter by status (planned|in-progress|blocked|done|archived)
+    --text <substring>        Substring match against common task fields
+    --json                    Output a single JSON array instead of JSON lines
+    Locate tasks quickly for dedupe/triage (LLM-friendly output).
 
 Examples:
   node .ai/scripts/projectctl.mjs init --project main
@@ -1057,7 +1067,169 @@ function cmdLint({ repoRoot, projectSlug, strict }) {
   return { ok: okExit, errors, warnings };
 }
 
-function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing }) {
+function formatJsonLines(rows) {
+  for (const r of rows) console.log(JSON.stringify(r));
+}
+
+function cmdQuery({ repoRoot, projectSlug, id, status, text, json }) {
+  // Query is designed for LLM consumption: default is JSONL (one object per line).
+  // It should work even when the hub is not initialized (fallback scanning).
+  const loaded = loadRegistry(repoRoot, projectSlug);
+  const registry = loaded.registry;
+  if (!registry && loaded.error) {
+    // Keep stdout clean (JSONL/JSON), but surface the issue for operators.
+    console.error(colors.yellow(`[warning] Failed to parse registry.yaml; falling back to dev-docs scan: ${loaded.error}`));
+  }
+
+  function normalizeStatus(s) {
+    const t = String(s || '').trim();
+    return t;
+  }
+
+  function includesText(value, needle) {
+    if (!needle) return true;
+    const n = String(needle).toLowerCase();
+    const v = String(value || '').toLowerCase();
+    return v.includes(n);
+  }
+
+  function taskMatches(t) {
+    if (id && String(t.id || '') !== id) return false;
+    if (status && normalizeStatus(t.status) !== status) return false;
+    if (text) {
+      const blobParts = [];
+      for (const k of ['id', 'slug', 'title', 'description', 'status', 'dev_docs_path', 'feature_id', 'milestone_id']) {
+        blobParts.push(String(t[k] || ''));
+      }
+      if (Array.isArray(t.keywords)) blobParts.push(t.keywords.join(' '));
+      const blob = blobParts.join('\n');
+      if (!includesText(blob, text)) return false;
+    }
+    return true;
+  }
+
+  // If the hub exists, query registry tasks directly.
+  if (registry && Array.isArray(registry.tasks)) {
+    const rows = registry.tasks
+      .filter((t) => t && typeof t === 'object')
+      .map((t) => ({
+        id: String(t.id || ''),
+        status: String(t.status || ''),
+        slug: String(t.slug || ''),
+        dev_docs_path: String(t.dev_docs_path || ''),
+        feature_id: String(t.feature_id || ''),
+        milestone_id: String(t.milestone_id || ''),
+        title: String(t.title || ''),
+        updated: String(t.updated || ''),
+        keywords: Array.isArray(t.keywords) ? t.keywords.map((k) => String(k)) : [],
+      }))
+      .filter(taskMatches)
+      .sort((a, b) => String(a.id).localeCompare(String(b.id)));
+
+    if (json) console.log(JSON.stringify(rows));
+    else formatJsonLines(rows);
+    return { ok: true, rows };
+  }
+
+  // Fallback: scan dev-docs roots (no hub required).
+  const roots = discoverDevDocsRoots(repoRoot);
+  const tasks = scanTasks(repoRoot, roots);
+  const rows = [];
+
+  for (const task of tasks) {
+    const overviewRaw = readText(task.overviewPath);
+    const metaRaw = readText(task.metaPath);
+
+    const effectiveStatus =
+      task.phase === 'archive'
+        ? 'archived'
+        : (() => {
+            if (!overviewRaw) return '';
+            const { status } = getBundleStatusFromOverview(overviewRaw);
+            return status || '';
+          })();
+
+    let taskId = '';
+    let keywords = [];
+    if (metaRaw) {
+      const meta = parseTaskMeta(metaRaw);
+      if (TASK_ID_RE.test(meta.task_id)) taskId = meta.task_id;
+      keywords = Array.isArray(meta.keywords) ? meta.keywords : [];
+    }
+
+    const row = {
+      id: taskId,
+      status: effectiveStatus,
+      slug: task.slug,
+      dev_docs_path: toPosix(task.relPath),
+      updated: '',
+      keywords: keywords.map((k) => String(k)),
+      meta_missing: !metaRaw,
+      overview_missing: !overviewRaw,
+    };
+
+    if (taskMatches(row)) rows.push(row);
+  }
+
+  rows.sort((a, b) => String(a.id || '').localeCompare(String(b.id || '')));
+  if (json) console.log(JSON.stringify(rows));
+  else formatJsonLines(rows);
+  return { ok: true, rows };
+}
+
+function computeChangelogEntries({ prevById, nextById, todayStr }) {
+  const lines = [];
+
+  for (const [id, next] of nextById.entries()) {
+    const prev = prevById.get(id);
+    if (!prev) {
+      lines.push(
+        `- ${todayStr} task_id=${id} slug=${next.slug || ''} event=registered dev_docs_path=${next.dev_docs_path || ''}`.trimEnd()
+      );
+      continue;
+    }
+    const prevStatus = String(prev.status || '');
+    const nextStatus = String(next.status || '');
+    if (prevStatus && nextStatus && prevStatus !== nextStatus) {
+      lines.push(
+        `- ${todayStr} task_id=${id} slug=${next.slug || ''} event=status from=${prevStatus} to=${nextStatus}`.trimEnd()
+      );
+    }
+  }
+
+  return lines;
+}
+
+function appendChangelog({ repoRoot, changelogPath, entries, dryRun, apply, initIfMissing, projectSlug }) {
+  if (!entries || entries.length === 0) return;
+
+  let base = readText(changelogPath);
+  if (!base && initIfMissing) {
+    const templatesDir = getTemplatesDir(repoRoot);
+    const tpl = path.join(templatesDir, 'changelog.md');
+    const tplRaw = readText(tpl);
+    if (tplRaw) base = renderTemplate(tplRaw, templateVars(projectSlug));
+  }
+
+  if (!base) {
+    // Do not fail sync for changelog issues.
+    return { ok: false, error: `Missing changelog file: ${toPosix(path.relative(repoRoot, changelogPath))}` };
+  }
+
+  const normalized = normalizeEol(base).trimEnd() + '\n';
+  const hasEntries = /(^|\n)## Entries\n/.test(normalized);
+  const toAppend = entries.join('\n') + '\n';
+  const next = hasEntries ? normalized + toAppend : normalized + '\n## Entries\n' + toAppend;
+
+  if (dryRun || !apply) {
+    return { ok: true, planned: true, next };
+  }
+
+  const changed = writeTextIfChanged(changelogPath, next);
+  return { ok: true, changed };
+}
+
+function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing, changelog }) {
   const actions = [];
   const errors = [];
   const warnings = [];
@@ -1116,6 +1288,21 @@ function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing }) {
         return { ok: false, errors, warnings, actions };
       }
       reg = loaded.registry;
+    }
+  }
+
+  // Snapshot previous registry tasks for optional changelog append.
+  const prevById = new Map();
+  if (reg && Array.isArray(reg.tasks)) {
+    for (const t of reg.tasks) {
+      if (!t || typeof t !== 'object') continue;
+      const id = String(t.id || '').trim();
+      if (!id) continue;
+      prevById.set(id, {
+        status: String(t.status || ''),
+        slug: String(t.slug || ''),
+        dev_docs_path: String(t.dev_docs_path || ''),
+      });
     }
   }
 
@@ -1236,6 +1423,19 @@ function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing }) {
 
   reg.tasks = [...tasksById.values()].sort((a, b) => String(a.id).localeCompare(String(b.id)));
 
+  // Optional changelog entries are derived from prev->next registry drift.
+  const nextById = new Map();
+  for (const t of reg.tasks) {
+    if (!t || typeof t !== 'object') continue;
+    const id = String(t.id || '').trim();
+    if (!id) continue;
+    nextById.set(id, {
+      status: String(t.status || ''),
+      slug: String(t.slug || ''),
+      dev_docs_path: String(t.dev_docs_path || ''),
+    });
+  }
+
   // Ensure system nodes exist
   if (!Array.isArray(reg.milestones)) reg.milestones = [];
   if (!reg.milestones.some((m) => m && m.id === 'M-000')) {
@@ -1272,6 +1472,32 @@ function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing }) {
   } else {
     const changed = writeTextIfChanged(registryPath, registryOut);
     if (changed) actions.push({ op: 'update', path: registryPath, note: 'update registry' });
+  }
+
+  // Optional: append changelog events (apply-mode only; append-only).
+  if (changelog) {
+    const hubDir = getHubDir(repoRoot, projectSlug);
+    const changelogPath = path.join(hubDir, 'changelog.md');
+    const entries = computeChangelogEntries({ prevById, nextById, todayStr });
+    const res = appendChangelog({
+      repoRoot,
+      changelogPath,
+      entries,
+      dryRun,
+      apply,
+      initIfMissing,
+      projectSlug,
+    });
+    if (res?.ok === false) {
+      warnings.push(String(res.error || 'Failed to append changelog.'));
+    } else if (entries.length > 0) {
+      actions.push({
+        op: dryRun || !apply ? 'append' : 'append',
+        path: changelogPath,
+        note: `changelog (${entries.length} entries)`,
+        mode: dryRun || !apply ? 'dry-run' : undefined,
+      });
+    }
   }
 
   // Derived views
@@ -1441,6 +1667,23 @@ function main() {
         dryRun: dryRun || !apply,
         apply: apply && !dryRun,
         initIfMissing: !!opts['init-if-missing'],
+        changelog: !!opts.changelog,
+      });
+      process.exit(res.ok ? 0 : 1);
+      break;
+    }
+    case 'query': {
+      const id = opts.id ? String(opts.id).trim() : '';
+      const status = opts.status ? String(opts.status).trim() : '';
+      const text = opts.text ? String(opts.text) : '';
+      const json = !!opts.json;
+      const res = cmdQuery({
+        repoRoot,
+        projectSlug,
+        id: id || null,
+        status: status || null,
+        text: text || null,
+        json,
       });
       process.exit(res.ok ? 0 : 1);
       break;
