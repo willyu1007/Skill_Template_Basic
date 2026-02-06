@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * projectctl.mjs
+ * ctl-project-governance.mjs
  *
  * Project governance control tool (init/lint/sync).
  *
@@ -59,7 +59,7 @@ function today() {
 function usage(exitCode = 0) {
   const msg = `
 Usage:
-  node .ai/scripts/projectctl.mjs <command> [options]
+  node .ai/scripts/ctl-project-governance.mjs <command> [options]
 
 Commands:
   init
@@ -106,11 +106,11 @@ Commands:
     Map a task to Feature/Milestone/Requirement in the registry.
 
 Examples:
-  node .ai/scripts/projectctl.mjs init --project main
-  node .ai/scripts/projectctl.mjs lint --check --project main
-  node .ai/scripts/projectctl.mjs sync --dry-run --project main
-  node .ai/scripts/projectctl.mjs sync --apply --project main
-  node .ai/scripts/projectctl.mjs map --task T-001 --feature F-002 --apply
+  node .ai/scripts/ctl-project-governance.mjs init --project main
+  node .ai/scripts/ctl-project-governance.mjs lint --check --project main
+  node .ai/scripts/ctl-project-governance.mjs sync --dry-run --project main
+  node .ai/scripts/ctl-project-governance.mjs sync --apply --project main
+  node .ai/scripts/ctl-project-governance.mjs map --task T-001 --feature F-002 --apply
 `.trim();
 
   console.log(msg);
@@ -913,7 +913,7 @@ function cmdLint({ repoRoot, projectSlug, strict }) {
 
   if (!registry) {
     warnings.push(
-      `Project hub is not initialized for project "${projectSlug}". Run: node .ai/scripts/projectctl.mjs init --project ${projectSlug}`
+      `Project hub is not initialized for project "${projectSlug}". Run: node .ai/scripts/ctl-project-governance.mjs init --project ${projectSlug}`
     );
     devDocsRoots = discoverDevDocsRoots(repoRoot);
   } else {
@@ -1257,7 +1257,7 @@ function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing, changelo
   } else {
     if (!initIfMissing) {
       errors.push(
-        `Project hub missing for "${projectSlug}". Run: node .ai/scripts/projectctl.mjs init --project ${projectSlug}`
+        `Project hub missing for "${projectSlug}". Run: node .ai/scripts/ctl-project-governance.mjs init --project ${projectSlug}`
       );
       return { ok: false, errors, warnings, actions };
     }

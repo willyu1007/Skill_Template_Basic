@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * cictl.mjs
+ * ctl-ci.mjs
  *
  * CI configuration helper for skill workflows.
  *
@@ -26,7 +26,7 @@ const SUPPORTED_PROVIDERS = ['github', 'gitlab'];
 function usage(exitCode = 0) {
   const msg = `
 Usage:
-  node .ai/scripts/cictl.mjs <command> [options]
+  node .ai/scripts/ctl-ci.mjs <command> [options]
 
 Commands:
   init
@@ -45,11 +45,11 @@ Commands:
     Show current CI status.
 
 Examples:
-  node .ai/scripts/cictl.mjs init
-  node .ai/scripts/cictl.mjs init --provider github
-  node .ai/scripts/cictl.mjs init --provider gitlab
-  node .ai/scripts/cictl.mjs verify
-  node .ai/scripts/cictl.mjs status
+  node .ai/scripts/ctl-ci.mjs init
+  node .ai/scripts/ctl-ci.mjs init --provider github
+  node .ai/scripts/ctl-ci.mjs init --provider gitlab
+  node .ai/scripts/ctl-ci.mjs verify
+  node .ai/scripts/ctl-ci.mjs status
 `;
   console.log(msg.trim());
   process.exit(exitCode);
@@ -246,11 +246,11 @@ function cmdInit(repoRoot, provider, dryRun) {
 ## Commands
 
 \`\`\`bash
-node .ai/scripts/cictl.mjs init
-node .ai/scripts/cictl.mjs init --provider github
-node .ai/scripts/cictl.mjs init --provider gitlab
-node .ai/scripts/cictl.mjs verify
-node .ai/scripts/cictl.mjs status
+node .ai/scripts/ctl-ci.mjs init
+node .ai/scripts/ctl-ci.mjs init --provider github
+node .ai/scripts/ctl-ci.mjs init --provider gitlab
+node .ai/scripts/ctl-ci.mjs verify
+node .ai/scripts/ctl-ci.mjs status
 \`\`\`
 
 ## Guidelines
@@ -286,21 +286,21 @@ function cmdVerify(repoRoot) {
   const warnings = [];
 
   if (!config.provider) {
-    warnings.push('No CI provider configured. Run: cictl init --provider <github|gitlab>');
+    warnings.push('No CI provider configured. Run: node .ai/scripts/ctl-ci.mjs init --provider <github|gitlab>');
   }
 
   if (!fs.existsSync(getCiDir(repoRoot))) {
-    errors.push('ci/ directory not found. Run: cictl init');
+    errors.push('ci/ directory not found. Run: node .ai/scripts/ctl-ci.mjs init');
   }
   if (!fs.existsSync(getConfigPath(repoRoot))) {
-    errors.push('ci/config.json not found. Run: cictl init');
+    errors.push('ci/config.json not found. Run: node .ai/scripts/ctl-ci.mjs init');
   }
 
   // Check provider-specific files
   if (config.provider === 'github') {
     const workflowDir = path.join(repoRoot, '.github', 'workflows');
     if (!fs.existsSync(workflowDir)) {
-      warnings.push('.github/workflows/ directory not found. Run: cictl init --provider github');
+      warnings.push('.github/workflows/ directory not found. Run: node .ai/scripts/ctl-ci.mjs init --provider github');
     } else {
       const workflows = fs.readdirSync(workflowDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
       if (workflows.length === 0) {
@@ -310,7 +310,7 @@ function cmdVerify(repoRoot) {
   } else if (config.provider === 'gitlab') {
     const gitlabCi = path.join(repoRoot, '.gitlab-ci.yml');
     if (!fs.existsSync(gitlabCi)) {
-      warnings.push('.gitlab-ci.yml not found. Run: cictl init --provider gitlab');
+      warnings.push('.gitlab-ci.yml not found. Run: node .ai/scripts/ctl-ci.mjs init --provider gitlab');
     }
   }
 

@@ -33,15 +33,15 @@ Avoid using Project Orchestrator for purely local implementation within an alrea
 ## Process (high-level)
 1. Ensure the project hub exists.
    - If missing, instruct to run:
-     - `node .ai/scripts/projectctl.mjs init --project <project>` (default: `main`)
+     - `node .ai/scripts/ctl-project-governance.mjs init --project <project>` (default: `main`)
 2. Load the current project state:
    - Prefer reading `.ai/project/<project>/registry.yaml`
    - Run lint for sanity if needed:
-     - `node .ai/scripts/projectctl.mjs lint --check --project <project>`
+     - `node .ai/scripts/ctl-project-governance.mjs lint --check --project <project>`
 3. Search for related work:
-   - Prefer using `projectctl query` first (LLM-friendly output):
-     - `node .ai/scripts/projectctl.mjs query --project <project> --text "<keywords>"`
-     - `node .ai/scripts/projectctl.mjs query --project <project> --status in-progress`
+   - Prefer using `ctl-project-governance query` first (LLM-friendly output):
+     - `node .ai/scripts/ctl-project-governance.mjs query --project <project> --text "<keywords>"`
+     - `node .ai/scripts/ctl-project-governance.mjs query --project <project> --status in-progress`
    - If hub is missing, `query` falls back to scanning `dev-docs/**`
    - Cross-check existing task bundles under `dev-docs/**` when needed
 4. Decide: reuse an existing Task vs propose a new Task.
@@ -50,12 +50,12 @@ Avoid using Project Orchestrator for purely local implementation within an alrea
    - Do **not** create the task bundle in Project Orchestrator
    - Instruct to create a task bundle (via task-level workflow), then register it:
      - Create the task bundle at: `dev-docs/active/<slug>/`
-     - Run: `node .ai/scripts/projectctl.mjs sync --apply --project <project>`
+     - Run: `node .ai/scripts/ctl-project-governance.mjs sync --apply --project <project>`
 6. Update project hub semantics (when needed):
    - Update `registry.yaml` to map Milestone/Feature/Requirement <-> Task
-   - Changelog: prefer `node .ai/scripts/projectctl.mjs sync --apply --project <project> --changelog` for registration/status events; add manual entries only for non-status events
+   - Changelog: prefer `node .ai/scripts/ctl-project-governance.mjs sync --apply --project <project> --changelog` for registration/status events; add manual entries only for non-status events
 7. Regenerate derived views (optional, but recommended after mapping changes):
-   - `node .ai/scripts/projectctl.mjs sync --apply --project <project>`
+   - `node .ai/scripts/ctl-project-governance.mjs sync --apply --project <project>`
 
 ## Outputs
 
@@ -76,13 +76,13 @@ Output MUST include a triage decision and actionable command sequence.
 
 | Decision | Next Actions |
 |----------|--------------|
-| NEW_TASK | 1. Create a dev-docs task bundle under `dev-docs/**/active/<slug>/` 2. `node .ai/scripts/projectctl.mjs sync --apply --project <project>` 3. `node .ai/scripts/projectctl.mjs lint --check --project <project>` |
-| REUSE_TASK | 1. Read `dev-docs/**/active/<slug>/00-overview.md` 2. (if needed) Update `State:` + `node .ai/scripts/projectctl.mjs sync --apply --project <project>` |
-| PROJECT_UPDATE | 1. Edit `.ai/project/<project>/registry.yaml` 2. `node .ai/scripts/projectctl.mjs sync --apply --project <project>` |
+| NEW_TASK | 1. Create a dev-docs task bundle under `dev-docs/**/active/<slug>/` 2. `node .ai/scripts/ctl-project-governance.mjs sync --apply --project <project>` 3. `node .ai/scripts/ctl-project-governance.mjs lint --check --project <project>` |
+| REUSE_TASK | 1. Read `dev-docs/**/active/<slug>/00-overview.md` 2. (if needed) Update `State:` + `node .ai/scripts/ctl-project-governance.mjs sync --apply --project <project>` |
+| PROJECT_UPDATE | 1. Edit `.ai/project/<project>/registry.yaml` 2. `node .ai/scripts/ctl-project-governance.mjs sync --apply --project <project>` |
 
 ## Verification
 - If you updated project hub files:
-  - `node .ai/scripts/projectctl.mjs lint --check --project <project>`
+  - `node .ai/scripts/ctl-project-governance.mjs lint --check --project <project>`
 - If you changed SSOT skills:
   - `node .ai/scripts/lint-skills.mjs --strict`
   - `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`

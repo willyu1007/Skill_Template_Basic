@@ -75,31 +75,31 @@
 
 | 脚本 | 行数 | 功能 |
 |------|------|------|
-| `projectctl.mjs` | ~1862 | 项目治理主脚本（init/query/lint/sync） |
+| `ctl-project-governance.mjs` | ~1862 | 项目治理主脚本（init/query/lint/sync） |
 
 **命令清单**：
 ```bash
 # 初始化项目中心
-node .ai/scripts/projectctl.mjs init --project main
+node .ai/scripts/ctl-project-governance.mjs init --project main
 
 # 查询任务
-node .ai/scripts/projectctl.mjs query --project main --text "keyword"
-node .ai/scripts/projectctl.mjs query --project main --status in-progress
-node .ai/scripts/projectctl.mjs query --project main --id T-001
+node .ai/scripts/ctl-project-governance.mjs query --project main --text "keyword"
+node .ai/scripts/ctl-project-governance.mjs query --project main --status in-progress
+node .ai/scripts/ctl-project-governance.mjs query --project main --id T-001
 
 # 校验（CI 友好）
-node .ai/scripts/projectctl.mjs lint --check --project main
+node .ai/scripts/ctl-project-governance.mjs lint --check --project main
 
 # 同步/修复漂移
-node .ai/scripts/projectctl.mjs sync --apply --project main
-node .ai/scripts/projectctl.mjs sync --apply --project main --changelog
+node .ai/scripts/ctl-project-governance.mjs sync --apply --project main
+node .ai/scripts/ctl-project-governance.mjs sync --apply --project main --changelog
 ```
 
 ### 3.2 Git Hooks
 
 | Hook | 功能 |
 |------|------|
-| `pre-commit` | `dev-docs/` 文件暂存时自动运行 `projectctl sync` |
+| `pre-commit` | `dev-docs/` 文件暂存时自动运行 `ctl-project-governance sync` |
 | `commit-msg` | 验证 conventional commit 格式 |
 | `install.mjs` | 安装/卸载/检查 hooks |
 
@@ -133,7 +133,7 @@ node .githooks/install.mjs --uninstall
 └── CONTRACT.md                  # 项目契约（SoT 定义）
 
 .ai/scripts/
-└── projectctl.mjs               # 核心治理脚本
+└── ctl-project-governance.mjs   # 核心治理脚本
 
 .ai/skills/workflows/planning/
 ├── project-orchestrator/
@@ -147,7 +147,7 @@ node .githooks/install.mjs --uninstall
 │       └── task-list.md
 └── project-sync-lint/
     ├── SKILL.md
-    └── templates/main/          # projectctl init 模板源
+    └── templates/main/          # ctl-project-governance init 模板源
         ├── changelog.md
         ├── dashboard.md
         ├── feature-map.md
@@ -181,7 +181,7 @@ node .githooks/install.mjs --uninstall
 ### 5.1 已完成
 
 - [x] CONTRACT.md 定义完整（SoT、状态模型、校验策略）
-- [x] projectctl.mjs 实现 init/query/lint/sync
+- [x] ctl-project-governance.mjs 实现 init/query/lint/sync
 - [x] Skill description 互斥性优化
 - [x] Git hooks 支持自动同步
 - [x] 模板文件位于 `project-sync-lint/templates/`
@@ -200,8 +200,8 @@ node .ai/scripts/lint-skills.mjs --strict
 node .ai/scripts/sync-skills.mjs --yes
 
 # Project lint (需先 init)
-node .ai/scripts/projectctl.mjs init --project main
-node .ai/scripts/projectctl.mjs lint --check --project main
+node .ai/scripts/ctl-project-governance.mjs init --project main
+node .ai/scripts/ctl-project-governance.mjs lint --check --project main
 ```
 
 ---
@@ -216,7 +216,7 @@ git clone <template-repo> my-project
 cd my-project
 
 # 2. 初始化项目中心
-node .ai/scripts/projectctl.mjs init --project main
+node .ai/scripts/ctl-project-governance.mjs init --project main
 
 # 3. (可选) 安装 Git hooks
 node .githooks/install.mjs
@@ -229,24 +229,24 @@ graph LR
     A[新需求] --> B{project-orchestrator}
     B -->|NEW_TASK| C[创建 dev-docs task bundle]
     B -->|REUSE_TASK| D[继续现有任务]
-    C --> E[projectctl sync]
+    C --> E[ctl-project-governance sync]
     D --> E
     E --> F[实施工作]
     F --> G[更新 00-overview.md State]
-    G --> H[projectctl sync]
+    G --> H[ctl-project-governance sync]
 ```
 
 ### 6.3 进度查询
 
 ```bash
 # 查看所有任务
-node .ai/scripts/projectctl.mjs query --project main
+node .ai/scripts/ctl-project-governance.mjs query --project main
 
 # 查看进行中任务
-node .ai/scripts/projectctl.mjs query --project main --status in-progress
+node .ai/scripts/ctl-project-governance.mjs query --project main --status in-progress
 
 # 关键词搜索
-node .ai/scripts/projectctl.mjs query --project main --text "auth"
+node .ai/scripts/ctl-project-governance.mjs query --project main --text "auth"
 ```
 
 ---

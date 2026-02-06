@@ -25,26 +25,26 @@
   - `.ai/skills/workflows/planning/project-orchestrator/`
   - `.ai/skills/workflows/planning/project-sync-lint/`
 - 新增治理脚本（依赖 Node ESM，无第三方依赖）：
-  - `.ai/scripts/projectctl.mjs`
+  - `.ai/scripts/ctl-project-governance.mjs`
   - 命令：`init`、`lint`、`sync`、`query`
   - 选项：`sync --changelog` 追加注册/状态变更事件到 `changelog.md`
 - `dev-docs` 模版对齐：`00-overview.md` 的 `- State:` 统一为单值，默认 `planned`。
-- CI 集成：`cictl.mjs` 生成的 GitHub Actions / GitLab CI 模版内置治理 lint。
+- CI 集成：`ctl-ci.mjs` 生成的 GitHub Actions / GitLab CI 模版内置治理 lint。
 - 多根 `dev-docs`：优先使用 `registry.yaml.project.task_doc_roots`，缺省自动发现。
 
 ## 期望效果
-- LLM 只需维护 `dev-docs/**` 进度，即可通过 `projectctl sync` 自动汇总到项目级视图。
-- 去重/检索靠 `projectctl query`（JSONL 输出，便于 LLM 消费）。
-- CI 通过 `projectctl lint --check` 提前发现漂移或不一致。
+- LLM 只需维护 `dev-docs/**` 进度，即可通过 `ctl-project-governance sync` 自动汇总到项目级视图。
+- 去重/检索靠 `ctl-project-governance query`（JSONL 输出，便于 LLM 消费）。
+- CI 通过 `ctl-project-governance lint --check` 提前发现漂移或不一致。
 - 项目级 `changelog.md` 在需要时可由 `sync --changelog` 自动追加关键事件。
 
 ## 使用与验证
 推荐最小命令集：
 ```bash
-node .ai/scripts/projectctl.mjs query --project main --text "<keywords>"
-node .ai/scripts/projectctl.mjs lint --check --project main
-node .ai/scripts/projectctl.mjs sync --apply --project main
-node .ai/scripts/projectctl.mjs sync --apply --project main --changelog
+node .ai/scripts/ctl-project-governance.mjs query --project main --text "<keywords>"
+node .ai/scripts/ctl-project-governance.mjs lint --check --project main
+node .ai/scripts/ctl-project-governance.mjs sync --apply --project main
+node .ai/scripts/ctl-project-governance.mjs sync --apply --project main --changelog
 ```
 
 注意：`sync --changelog` 只追加“注册/状态变更”类事件，其他事件仍需手工补充。

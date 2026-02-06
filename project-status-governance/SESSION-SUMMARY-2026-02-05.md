@@ -1,7 +1,7 @@
 # Session Summary: 项目进度管理系统优化
 
 **日期**: 2026-02-05  
-**范围**: `.ai/` 项目治理系统、skills、projectctl 工具、可选 Git hooks
+**范围**: `.ai/` 项目治理系统、skills、ctl-project-governance 工具、可选 Git hooks
 
 ---
 
@@ -39,15 +39,15 @@
 | 问题 | 影响 |
 |------|------|
 | 缺少统一入口 skill | LLM 不确定从哪个 skill 开始 |
-| `projectctl` 缺少 `map` 命令 | 无法直接映射 Task → Feature/Requirement |
+| `ctl-project-governance` 缺少 `map` 命令 | 无法直接映射 Task → Feature/Requirement |
 | CONTRACT.md 缺少 LLM 导航章节 | LLM 缺乏工作流指导 |
 
 ### 2.4 审计补充：稳定性与自动化边角
 
 | 问题 | 位置 | 影响 |
 |------|------|------|
-| `task_id` 分配策略潜在“复用历史 ID”风险（与契约“ID 不复用”精神冲突） | `.ai/scripts/projectctl.mjs` | task_id 可能失去长期稳定性 |
-| CLI 提示文案使用 `projectctl init ...`（缺少可执行体） | `.ai/scripts/projectctl.mjs` | 操作指引歧义、降低可执行性 |
+| `task_id` 分配策略潜在“复用历史 ID”风险（与契约“ID 不复用”精神冲突） | `.ai/scripts/ctl-project-governance.mjs` | task_id 可能失去长期稳定性 |
+| CLI 提示文案使用 `ctl-project-governance init ...`（缺少可执行体） | `.ai/scripts/ctl-project-governance.mjs` | 操作指引歧义、降低可执行性 |
 | pre-commit 仅识别根 `dev-docs/`，对多 root `dev-docs` 不友好 | `.githooks/pre-commit` | 自动同步覆盖不全 |
 
 ---
@@ -72,7 +72,7 @@
 | 功能 | 实现 |
 |------|------|
 | 统一入口 | 新建 `task-starter` skill |
-| 任务映射 | `projectctl map --task T-xxx --feature F-xxx` |
+| 任务映射 | `ctl-project-governance map --task T-xxx --feature F-xxx` |
 | LLM 导航 | CONTRACT.md 第 9 节 Workflow Decision Flow |
 
 ---
@@ -143,7 +143,7 @@
 ### Next Actions by Decision Type
 | Decision | Next Actions |
 |----------|--------------|
-| NEW_TASK | 1. `create-dev-docs-plan` 2. `projectctl sync` 3. `projectctl lint` |
+| NEW_TASK | 1. `create-dev-docs-plan` 2. `ctl-project-governance sync` 3. `ctl-project-governance lint` |
 | ...
 ```
 
@@ -165,15 +165,15 @@
 **原**: Phase 0/1/2 散文式 (~70 行)  
 **新**: 3 个表格 (~30 行)
 
-### 4.7 projectctl map 命令
+### 4.7 ctl-project-governance map 命令
 
-**路径**: `.ai/scripts/projectctl.mjs`
+**路径**: `.ai/scripts/ctl-project-governance.mjs`
 
 **用法**:
 ```bash
-node .ai/scripts/projectctl.mjs map --task T-001 --feature F-002 --apply
-node .ai/scripts/projectctl.mjs map --task T-001 --milestone M-001 --apply
-node .ai/scripts/projectctl.mjs map --task T-001 --requirement R-003 --apply
+node .ai/scripts/ctl-project-governance.mjs map --task T-001 --feature F-002 --apply
+node .ai/scripts/ctl-project-governance.mjs map --task T-001 --milestone M-001 --apply
+node .ai/scripts/ctl-project-governance.mjs map --task T-001 --requirement R-003 --apply
 ```
 
 **功能**: 将任务映射到 Feature/Milestone/Requirement，自动更新 registry.yaml
@@ -183,14 +183,14 @@ node .ai/scripts/projectctl.mjs map --task T-001 --requirement R-003 --apply
 | 项目 | 修正 | 说明 |
 |------|------|------|
 | `task_id` 分配策略 | 改为单调递增（max+1）并将 registry 里的历史 id 计入占用集 | 降低“复用历史 ID”风险（符合契约精神） |
-| CLI 操作指引 | `Run: projectctl init ...` → `node .ai/scripts/projectctl.mjs init ...` | 避免误导 |
+| CLI 操作指引 | `Run: ctl-project-governance init ...` → `node .ai/scripts/ctl-project-governance.mjs init ...` | 避免误导 |
 | pre-commit 多 root dev-docs | staged 文件匹配 `(^|/)dev-docs/`；stage `**/.ai-task.yaml` 使用 Git pathspec | 覆盖模块化仓库结构 |
 
 ### 4.9 二次审计修正
 
 | 项目 | 修正 | 说明 |
 |------|------|------|
-| CLI 命令简写 | 表格中 `projectctl sync` → `node .ai/scripts/projectctl.mjs sync` | 完整可执行路径，提升 LLM 可执行性 |
+| CLI 命令简写 | 表格中 `ctl-project-governance sync` → `node .ai/scripts/ctl-project-governance.mjs sync` | 完整可执行路径，提升 LLM 可执行性 |
 | 涉及文件 | `task-starter`, `project-orchestrator`, `CONTRACT.md` | 统一命令格式 |
 
 ### 4.10 多项目支持增强
@@ -210,9 +210,9 @@ node .ai/scripts/projectctl.mjs map --task T-001 --requirement R-003 --apply
 |--------|------|
 | `lint-skills.mjs --strict` | ✅ 60/60 通过 |
 | `sync-skills.mjs` | ✅ 已同步到 .claude/ 和 .codex/ |
-| `projectctl lint --check` | ✅ 通过 |
-| `projectctl sync --apply` | ✅ 通过（已生成/更新 hub 派生视图） |
-| `projectctl sync --dry-run` | ✅ 通过（无副作用预览可用） |
+| `ctl-project-governance lint --check` | ✅ 通过 |
+| `ctl-project-governance sync --apply` | ✅ 通过（已生成/更新 hub 派生视图） |
+| `ctl-project-governance sync --dry-run` | ✅ 通过（无副作用预览可用） |
 
 ### 5.2 最终评估
 
@@ -238,7 +238,7 @@ node .ai/scripts/projectctl.mjs map --task T-001 --requirement R-003 --apply
 | `.ai/skills/workflows/planning/plan-maker/templates/roadmap.md` | 修改：术语 |
 | `.ai/skills/workflows/planning/plan-maker/reference/detailed-docs-convention.md` | 修改：术语 |
 | `.ai/skills/workflows/dev-docs/update-dev-docs-for-handoff/SKILL.md` | 修改：术语 |
-| `.ai/scripts/projectctl.mjs` | 修改：添加 map 命令；修正 task_id 分配与提示文案 |
+| `.ai/scripts/ctl-project-governance.mjs` | 修改：添加 map 命令；修正 task_id 分配与提示文案 |
 | `.githooks/install.mjs` | 新增：hooks 安装器（core.hooksPath） |
 | `.githooks/pre-commit` | 新增/修改：dev-docs 变更自动 sync（支持多 root） |
 | `.githooks/commit-msg` | 新增：conventional commit 校验 |
@@ -251,8 +251,8 @@ node .ai/scripts/projectctl.mjs map --task T-001 --requirement R-003 --apply
 
 | 项目 | 优先级 | 说明 |
 |------|--------|------|
-| `projectctl map` 的校验与联动 | 中 | 校验 `F-/M-/R-` ID 格式；或在文档中明确 “map 后需要 sync 刷新派生视图” |
-| 单元测试 | 低 | 为 `projectctl`（尤其 lint/sync/map）补最小单测，降低回归风险 |
+| `ctl-project-governance map` 的校验与联动 | 中 | 校验 `F-/M-/R-` ID 格式；或在文档中明确 “map 后需要 sync 刷新派生视图” |
+| 单元测试 | 低 | 为 `ctl-project-governance`（尤其 lint/sync/map）补最小单测，降低回归风险 |
 | milestone/requirement 视图增强 | 低 | dashboard 增强：按 milestone 汇总、按 requirement 反查任务（非必需） |
 
 ---

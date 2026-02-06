@@ -26,7 +26,7 @@ Use the `sync-db-schema-from-code` skill only when the project DB SSOT is `repo-
 To check the mode, read:
 
 - `docs/project/db-ssot.json`
-- Or run: `node .ai/scripts/dbssotctl.mjs status`
+- Or run: `node .ai/scripts/ctl-db-ssot.mjs status`
 
 ## When to use
 
@@ -139,9 +139,9 @@ Record evidence in `04-post-verify.md`.
 
 13. Refresh LLM DB context contract:
 
-- `node .ai/scripts/dbssotctl.mjs sync-to-context`
+- `node .ai/scripts/ctl-db-ssot.mjs sync-to-context`
 
-> **Note:** The generated artifact (`docs/context/db/schema.json`) is produced by `dbssotctl`. Context registration (if any) is the responsibility of external tooling; `dbssotctl` does not auto-invoke context managers.
+> **Note:** The generated artifact (`docs/context/db/schema.json`) is produced by `ctl-db-ssot`. Context registration (if any) is the responsibility of external tooling; `ctl-db-ssot` does not auto-invoke context managers.
 
 ## Verification
 
@@ -151,7 +151,7 @@ Record evidence in `04-post-verify.md`.
 - [ ] Apply step executed with logs
 - [ ] Post-verify evidence captured
 - [ ] Domain/repository mapping updated (no Prisma types in business layer)
-- [ ] `docs/context/db/schema.json` refreshed via `dbssotctl`
+- [ ] `docs/context/db/schema.json` refreshed via `ctl-db-ssot`
 
 ## Boundaries
 
