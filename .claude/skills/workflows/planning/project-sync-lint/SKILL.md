@@ -1,6 +1,6 @@
 ---
 name: project-sync-lint
-description: Project hub synchronizer and validator. Use to scan the entire repo (including multiple dev-docs roots), validate the repo against .ai/project/CONTRACT.md, lint project/task metadata, and fix drift by generating missing task identity meta (.ai-task.yaml) and regenerating derived views under .ai/project/<project>/. Suitable for CI gate (check-only) and manual repair (apply). Keywords: sync, lint, validate, writeback, registry, dashboard, changelog, derived views.
+description: Project hub synchronizer and validator. Scans the repo (including multiple dev-docs roots), validates project/task metadata against the Project Contract, and can repair drift by generating missing task identity meta (.ai-task.yaml) and regenerating derived views under .ai/project/<project>/. Works in check-only mode for CI and apply mode for manual repair.
 category: workflows/planning
 ssot_path: .ai/skills/workflows/planning/project-sync-lint
 ---

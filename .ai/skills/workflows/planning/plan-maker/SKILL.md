@@ -1,6 +1,6 @@
 ---
 name: plan-maker
-description: Create a goal-aligned macro-level roadmap (dev-docs/active/<task>/roadmap.md) by asking clarifying questions when needed; planning only (no code changes); strong signal words: make plan/roadmap/implementation plan.
+description: Create a goal-aligned macro-level roadmap artifact (dev-docs/active/<task>/roadmap.md) by asking clarifying questions and recording assumptions; planning only (no code changes).
 ---
 
 # Plan Maker
@@ -10,8 +10,8 @@ Produce a single, goal-aligned macro-level roadmap as a Markdown document that c
 
 ## When to use
 Use the plan-maker skill when:
-- **Strong trigger**: The user explicitly asks for a saved “roadmap” document/artifact — MUST use the `plan-maker` skill unless the change is trivial (`< 30 min`)
-- The user asks for a plan/milestones/implementation plan before coding
+- The user wants a saved roadmap/plan artifact under `dev-docs/active/` (not just an in-chat outline), unless the change is trivial (`< 30 min`)
+- The user asks for a plan/phases/implementation plan before coding
 - The user asks to "align thinking first" or "clarify direction" before planning
 - The task is large/ambiguous and benefits from staged execution and verification
 - You need a roadmap artifact saved under `dev-docs/active/` for collaboration and handoff
@@ -39,77 +39,45 @@ Avoid the skill when:
 
 ## Steps
 
-### Phase 0 — Requirements alignment (optional, triggered by user request)
+### Phase 0 — Requirements alignment (optional)
 
-0. **Check for requirements alignment request**:
-   - If user asks to "align thinking first" or "clarify direction", or provides an existing requirements document:
-     - Proceed to step 0a
-   - Otherwise, skip to step 1
+| Step | Condition | Action |
+|------|-----------|--------|
+| 0 | User asks "align thinking first" OR provides requirements doc | Proceed to 0a; else skip to Phase 1 |
+| 0a | Existing doc provided | Read + extract (goal, use cases, boundaries, constraints) + confirm |
+| 0a | Interactive collection | Ask: core goal, use cases (2-5), non-goals, constraints + confirm |
+| 0b | Alignment mode active | Save to `dev-docs/active/<task>/requirement.md` + confirm before Phase 1 |
 
-0a. **Requirements source handling**:
-   - If user provides an existing document path:
-     - Read the document and extract: goal, use cases, boundaries, constraints
-     - Summarize key points and confirm understanding with user
-   - If user requests interactive collection:
-     - Ask structured questions to collect:
-       - Core goal (1 sentence)
-       - Main use cases (2-5)
-       - Boundaries / non-goals
-       - Key constraints
-     - Summarize collected requirements and confirm with user
+### Phase 1 — Roadmap creation (core)
 
-0b. **Generate requirements document** (if alignment mode is active):
-   - Propose `<task>` slug (if not yet confirmed)
-   - Save aligned requirements to `dev-docs/active/<task>/requirement.md`
-   - Confirm with user: "Requirements documented. Proceed to roadmap creation?"
-   - If user confirms, continue to step 1
-   - If user wants to refine, iterate on requirements document
+| Step | Action | Notes |
+|------|--------|-------|
+| 1 | Restate goal + confirm direction | One sentence |
+| 2 | Ask clarifying questions OR record assumptions | Scope, non-goals, success criteria, constraints |
+| 3 | Propose + confirm `<task>` slug | kebab-case; skip if confirmed in Phase 0 |
+| 4 | Draft roadmap using `./templates/roadmap.md` | Macro-level: phases, deliverables, verification, risks, rollback |
+| 5 | Save to `dev-docs/active/<task>/roadmap.md` | Required |
+| 6 | Return handoff message | Goal, save path, next 3 actions |
 
-### Phase 1 — Roadmap creation (core workflow)
-
-1. Restate the goal in one sentence and confirm direction.
-2. Identify what is unclear and ask clarifying questions.
-   - Ask only what is necessary to align the roadmap to the goal (scope, non-goals, target environment, success criteria, constraints).
-   - If the user cannot answer now, record assumptions explicitly and surface the risk.
-   - If a requirements document exists at `dev-docs/active/<task>/requirement.md`, use `dev-docs/active/<task>/requirement.md` as input.
-3. Propose a `<task>` slug and confirm the `<task>` slug with the user.
-   - Use kebab-case; avoid dates unless requested.
-   - If already confirmed in Phase 0, skip step 3.
-4. Draft the roadmap using `./templates/roadmap.md`.
-   - Keep the roadmap macro-level: phases, milestones, deliverables, verification, risks, rollback.
-   - Always include the **Project structure change preview (may be empty)** section from the template:
-     - Use it as a **non-binding alignment aid** (humans confirm expected impact early; execution may differ).
-     - Prefer **directory-level** paths by default; use file-level paths only when you have clear evidence.
-     - Do not guess project-specific paths or interfaces; if you have not inspected the repo, keep `(none)` or use `<TBD>`.
-     - If unknown, keep `(none)` or use `<TBD>` and add/keep a **Discovery** step to confirm.
-   - Only include specific file paths/APIs elsewhere when you have evidence; otherwise add a discovery step.
-   - Include an "Optional detailed documentation layout (convention)" section that declares the expected file layout under `dev-docs/active/<task>/` without creating those files.
-5. Save the roadmap to `dev-docs/active/<task>/roadmap.md`.
-6. Return a short handoff message to the user:
-   - confirmed goal
-   - where the roadmap was saved
-   - the next 3 actions to start execution (without executing them)
+**Step 4 constraints**:
+- Include "Project structure change preview" section (may be empty)
+- Prefer directory-level paths; use `(none)` or `<TBD>` if unknown
+- Do NOT guess project-specific paths without evidence
 
 ### Phase 2 — dev-docs linkage (conditional)
 
-7. **Evaluate dev-docs Decision Gate**:
-   - Check if task meets any of these criteria:
-     - Expected duration > 2 hours, or likely to span multiple sessions
-     - The work will be paused/handed off, or the user explicitly needs context recovery artifacts
-     - The change is high-risk or cross-cutting (e.g., DB/schema migration, auth/security, CI/CD/infra, multi-service/API boundary changes)
-   - If criteria are met:
-     - Inform user: "This task qualifies for a full dev-docs bundle for context preservation."
-     - Ask: "Would you like to create the complete documentation bundle now?"
-     - If user confirms, **trigger `create-dev-docs-plan` skill** with the roadmap as input
-   - If criteria not met:
-     - Note in the handoff message that roadmap is sufficient for the current task
+| Condition | Action |
+|-----------|--------|
+| Task meets Decision Gate (>2h OR multi-session OR high-risk OR cross-cutting) | Prompt user: "Create full dev-docs bundle?" |
+| User confirms | Proceed with the dev-docs task bundle workflow using the roadmap as input |
+| Criteria not met | Note in handoff: roadmap is sufficient |
 
 ## Verification
 - [ ] Goal is restated and (where needed) confirmed with the user
 - [ ] Ambiguities are resolved or recorded as explicit open questions/assumptions
 - [ ] (If alignment mode) Requirements document saved to `dev-docs/active/<task>/requirement.md`
 - [ ] (If alignment mode) User confirmed requirements understanding before roadmap creation
-- [ ] Roadmap includes milestones/phases and per-step deliverables
+- [ ] Roadmap includes phases and per-step deliverables
 - [ ] Roadmap includes "Project structure change preview" section (may be empty)
 - [ ] Roadmap defines verification/acceptance criteria and a rollback strategy
 - [ ] Roadmap is saved to `dev-docs/active/<task>/roadmap.md`
@@ -120,13 +88,13 @@ Avoid the skill when:
 - MUST NOT modify application/source code, project configuration, or database state
 - MUST ask clarifying questions when the goal or constraints are ambiguous
 - MUST NOT invent project-specific facts (APIs, file paths, schemas) without evidence
-- **MUST use the `plan-maker` skill when the user explicitly asks for a saved “roadmap” document/artifact** (strong trigger)
+- When the user requests a persistent plan artifact, write the roadmap to `dev-docs/active/<task>/roadmap.md` instead of keeping it only in chat, unless the change is trivial (`< 30 min`)
 - If the user asks to implement immediately but the task is non-trivial, produce the roadmap first, then ask for confirmation to proceed with execution in a follow-up turn.
-- If the task meets the dev-docs Decision Gate, **MUST prompt user** whether to continue with `create-dev-docs-plan`
-- If user confirms dev-docs bundle creation, **MUST trigger `create-dev-docs-plan` skill**
+- If the task meets the dev-docs Decision Gate, prompt the user whether to create a full dev-docs task bundle.
+- If the user confirms bundle creation, proceed with the dev-docs task bundle workflow in a follow-up turn.
 - SHOULD keep the roadmap macro-level; deep design details belong in separate documentation artifacts
 - SHOULD NOT include secrets (credentials, tokens, private keys) in the roadmap
-- PRODUCES macro-level roadmaps: milestones, phases, scope, impact, risks, rollback strategy
+- PRODUCES macro-level roadmaps: phases, scope, impact, risks, rollback strategy
 - PRODUCES requirements documents (when alignment mode is active)
 - DOES NOT produce implementation-level documentation (architecture diagrams, step-by-step code guides, pitfalls logs)
 - The roadmap is a planning artifact; detailed implementation docs belong to a separate documentation bundle

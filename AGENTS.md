@@ -14,15 +14,10 @@ Template repository. Users clone the repo to start new AI-friendly projects.
 | `.ai/` | Skills, scripts, LLM governance (see `.ai/AGENTS.md`) |
 | `dev-docs/` | Working documentation for complex tasks |
 
-## Routing
+## Skill selection (description-only)
 
-| Task Type | Entry Point |
-|-----------|-------------|
-| **First time / Project setup** | `init/AGENTS.md` |
-| **Skill authoring / maintenance** | `.ai/AGENTS.md` |
-| **Project governance / progress** | `.ai/project/AGENTS.md` |
-| **LLM engineering** | `.ai/llm-config/AGENTS.md` |
-| **Complex task documentation** | `dev-docs/AGENTS.md` |
+- Select skills by semantic match to each skill’s frontmatter `description`.
+- Avoid duplicating routing rules across `AGENTS.md`, contracts, and other docs; refine the relevant skill description instead.
 
 ## Global Rules
 

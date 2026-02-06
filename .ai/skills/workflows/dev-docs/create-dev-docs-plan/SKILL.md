@@ -53,7 +53,7 @@ dev-docs/active/<task-slug>/
 
 ## Rules
 - The overview MUST state the goal and non-goals.
-- The plan MUST include milestones and acceptance criteria.
+- The plan MUST include phases and acceptance criteria.
 - The architecture doc MUST capture boundaries and contracts.
 - Verification MUST be concrete (commands/checks, expected results).
 - The task bundle MUST include `05-pitfalls.md` and the pitfalls log MUST be updated when failures are resolved (historical lessons, append-only).
@@ -61,37 +61,21 @@ dev-docs/active/<task-slug>/
 - For tasks that meet the Decision Gate, the bundle MUST be created before implementation work begins (before code/config changes).
 
 ## Steps
-1. Create `dev-docs/active/<task-slug>/`.
-2. Write `00-overview.md`:
-   - problem statement
-   - status (`planned` / `in-progress` / `blocked` / `done`) as a single value + next concrete step
-   - goal
-   - non-goals
-   - high-level acceptance criteria
-3. Write `01-plan.md`:
-   - milestones
-   - step order
-   - risks and mitigations
-4. Write `02-architecture.md`:
-   - boundaries
-   - interfaces/contracts
-   - data migrations (if any)
-5. Write `03-implementation-notes.md`:
-   - decisions made
-   - deviations from plan (with rationale)
-   - open issues requiring follow-up action (current state, actionable TODOs)
-6. Write `04-verification.md`:
-   - automated checks
-   - manual smoke checks
-   - rollout/backout notes (if needed)
-7. Write `05-pitfalls.md`:
-   - a short `do-not-repeat` summary (fast scan for future contributors)
-   - an append-only log of resolved failures and dead ends (historical lessons, not current issues)
+
+| Step | File | Required Content |
+|------|------|------------------|
+| 1 | Create `dev-docs/active/<task-slug>/` | Directory |
+| 2 | `00-overview.md` | problem statement, status (single value), goal, non-goals, acceptance criteria |
+| 3 | `01-plan.md` | phases, step order, risks and mitigations |
+| 4 | `02-architecture.md` | boundaries, interfaces/contracts, data migrations |
+| 5 | `03-implementation-notes.md` | decisions, deviations (with rationale), open issues (actionable TODOs) |
+| 6 | `04-verification.md` | automated checks, manual smoke checks, rollout/backout notes |
+| 7 | `05-pitfalls.md` | do-not-repeat summary, append-only log of resolved failures |
 
 ## Verification
 - [ ] Task directory follows the standard layout (`00-overview.md`, `01-plan.md`, etc.)
 - [ ] Overview clearly states goals and non-goals
-- [ ] Plan includes milestones with acceptance criteria
+- [ ] Plan includes phases with acceptance criteria
 - [ ] Architecture captures boundaries and contracts
 - [ ] Verification has concrete commands/checks and expected results
 - [ ] `05-pitfalls.md` exists and is structured for fast scanning + append-only updates
@@ -105,8 +89,8 @@ dev-docs/active/<task-slug>/
 - SHOULD NOT deviate from the standard directory layout without justification
 - SHOULD keep overview high-level (implementation detail belongs elsewhere)
 - PRODUCES implementation-level documentation bundle (overview, plan, architecture, notes, verification, pitfalls)
-- DOES NOT produce macro-level roadmaps (milestone definitions, scope/impact analysis, rollback strategies)
-- If a macro roadmap exists, use the roadmap as input; the `01-plan.md` here captures step-level execution detail, not phase/milestone planning
+- DOES NOT produce macro-level roadmaps (Milestone definitions, scope/impact analysis, rollback strategies)
+- If a macro roadmap exists, use the roadmap as input; the `01-plan.md` here captures step-level execution detail, not project-level Milestone planning
 
 ## Writing and collaboration tips (borrowed)
 

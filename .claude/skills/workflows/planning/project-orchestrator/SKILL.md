@@ -1,6 +1,6 @@
 ---
 name: project-orchestrator
-description: Front-door project work orchestrator for this repo. Use when starting or continuing any development request that needs triage, deduplication, mapping to the project mainline (Milestone/Feature/Requirement/Task), or deciding whether to reuse an existing task or register a new one. Maintains project-level continuity via the project hub under .ai/project/<project>/ (registry + changelog + derived views coordination). Keywords: triage, dedupe, mapping, milestone, feature, requirement, task, registry, dashboard.
+description: Project-level orchestrator for intake and continuity. Turns a new/ongoing request into a governance decision (reuse vs new task, mapping to Milestone/Feature/Requirement) and keeps the project hub consistent (registry/changelog/derived views). Focuses on planning and coordination, not product code changes.
 category: workflows/planning
 ssot_path: .ai/skills/workflows/planning/project-orchestrator
 ---

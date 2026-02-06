@@ -1,6 +1,6 @@
 # AGENTS (Project Governance)
 
-This file is the entry point for AI agents working with **project-level** governance in this repository.
+Entry point for AI agents working with **project-level** governance in the repository.
 
 ## Quick start
 
@@ -31,20 +31,20 @@ Optional: append sync-detected events to changelog (append-only):
 node .ai/scripts/projectctl.mjs sync --apply --project main --changelog
 ```
 
-## What to use when
+5) (Optional) Install Git hooks for automatic sync on commit:
+```bash
+node .githooks/install.mjs
+```
 
-### Use `project-orchestrator` when you:
-- Start any new development request
-- Need intake/triage/deduplication
-- Need to map work to Milestones/Features/Requirements
-- Need to decide whether to reuse an existing task or register a new one
-- Need to update the project registry/changelog for continuity
+Installed hooks:
+- `pre-commit`: Auto-runs `projectctl sync` when `dev-docs/` files are staged
+- `commit-msg`: Validates conventional commit format
 
-### Use `project-sync-lint` when you:
-- Need to validate the repo against the Project Contract
-- Need to generate missing `.ai-task.yaml` files (IDs)
-- Need to regenerate derived views (dashboard/task-index/feature-map)
-- Need a CI gate to prevent project metadata drift
+To check status or uninstall:
+```bash
+node .githooks/install.mjs --check
+node .githooks/install.mjs --uninstall
+```
 
 ## Key principles
 - Task execution progress is maintained in `dev-docs/**` (task bundle is the SoT for status).

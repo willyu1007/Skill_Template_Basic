@@ -1,6 +1,6 @@
 ---
 name: project-orchestrator
-description: Front-door project work orchestrator for this repo. Use when starting or continuing any development request that needs triage, deduplication, mapping to the project mainline (Milestone/Feature/Requirement/Task), or deciding whether to reuse an existing task or register a new one. Maintains project-level continuity via the project hub under .ai/project/<project>/ (registry + changelog + derived views coordination). Keywords: triage, dedupe, mapping, milestone, feature, requirement, task, registry, dashboard.
+description: Project-level orchestrator for intake and continuity. Turns a new/ongoing request into a governance decision (reuse vs new task, mapping to Milestone/Feature/Requirement) and keeps the project hub consistent (registry/changelog/derived views). Focuses on planning and coordination, not product code changes.
 ---
 
 # Project Orchestrator
@@ -12,10 +12,10 @@ Provide a **single front door** for project-level governance:
 - Advance the project mainline (milestones, priorities)
 - Keep the project hub consistent with ongoing work
 
-This skill is **project-management oriented**. It should not implement product code changes.
+Project Orchestrator is **project-management oriented**. The workflow should not implement product code changes.
 
 ## When to use
-Use this skill when the request involves any of the following:
+Use Project Orchestrator when the request involves any of the following:
 - Starting a new development request (feature, bug fix, refactor, integration)
 - Continuing work but needing to locate the right task or decide whether to create a new task
 - Mapping work to Milestones/Features/Requirements
@@ -23,7 +23,7 @@ Use this skill when the request involves any of the following:
 - Writing project-level updates (`registry.yaml`, `changelog.md`) to maintain long-term continuity
 
 ## When to avoid
-Avoid using this skill for purely local implementation within an already-scoped task when no scope/status/mapping changes are needed. In those cases, use task-level execution skills and rely on `project-sync-lint` for eventual consistency.
+Avoid using Project Orchestrator for purely local implementation within an already-scoped task when no scope/status/mapping changes are needed. In those cases, proceed with task-level execution workflows and run hub lint/sync later as needed.
 
 ## Inputs
 - Natural-language request (new work or continuation)
@@ -33,45 +33,62 @@ Avoid using this skill for purely local implementation within an already-scoped 
 ## Process (high-level)
 1. Ensure the project hub exists.
    - If missing, instruct to run:
-     - `node .ai/scripts/projectctl.mjs init --project main`
+     - `node .ai/scripts/projectctl.mjs init --project <project>` (default: `main`)
 2. Load the current project state:
-   - Prefer reading `.ai/project/main/registry.yaml`
+   - Prefer reading `.ai/project/<project>/registry.yaml`
    - Run lint for sanity if needed:
-     - `node .ai/scripts/projectctl.mjs lint --check --project main`
+     - `node .ai/scripts/projectctl.mjs lint --check --project <project>`
 3. Search for related work:
    - Prefer using `projectctl query` first (LLM-friendly output):
-     - `node .ai/scripts/projectctl.mjs query --project main --text "<keywords>"`
-     - `node .ai/scripts/projectctl.mjs query --project main --status in-progress`
+     - `node .ai/scripts/projectctl.mjs query --project <project> --text "<keywords>"`
+     - `node .ai/scripts/projectctl.mjs query --project <project> --status in-progress`
    - If hub is missing, `query` falls back to scanning `dev-docs/**`
    - Cross-check existing task bundles under `dev-docs/**` when needed
 4. Decide: reuse an existing Task vs propose a new Task.
 5. If a new Task is needed:
    - Propose a stable task slug (kebab-case)
-   - Do **not** create the task bundle in this skill
+   - Do **not** create the task bundle in Project Orchestrator
    - Instruct to create a task bundle (via task-level workflow), then register it:
      - Create the task bundle at: `dev-docs/active/<slug>/`
-     - Run: `node .ai/scripts/projectctl.mjs sync --apply --project main`
+     - Run: `node .ai/scripts/projectctl.mjs sync --apply --project <project>`
 6. Update project hub semantics (when needed):
    - Update `registry.yaml` to map Milestone/Feature/Requirement <-> Task
-   - Changelog: prefer `projectctl sync --apply --changelog` for registration/status events; add manual entries only for non-status events
+   - Changelog: prefer `node .ai/scripts/projectctl.mjs sync --apply --project <project> --changelog` for registration/status events; add manual entries only for non-status events
 7. Regenerate derived views (optional, but recommended after mapping changes):
-   - `node .ai/scripts/projectctl.mjs sync --apply --project main`
+   - `node .ai/scripts/projectctl.mjs sync --apply --project <project>`
 
 ## Outputs
-- An explicit triage decision:
-  - Matched Task(s) with rationale and next action, OR
-  - New Task proposal (slug + mapping intent) and next steps
-- Project hub updates under `.ai/project/main/` when applicable
+
+Output MUST include a triage decision and actionable command sequence.
+
+### Output Fields
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| Decision | `REUSE_TASK` / `NEW_TASK` / `PROJECT_UPDATE` | `NEW_TASK` |
+| Rationale | One sentence explanation | "No existing task covers OAuth2 integration" |
+| Task ID | `T-xxx` or `pending assignment` | `T-005` |
+| Slug | kebab-case task slug | `oauth2-provider-integration` |
+| Mapping | `M-xxx > F-xxx > R-xxx > T-xxx` | `M-001 > F-002 > R-003 > T-005` |
+| Next Actions | Numbered command/skill list | See below |
+
+### Next Actions by Decision Type
+
+| Decision | Next Actions |
+|----------|--------------|
+| NEW_TASK | 1. Create a dev-docs task bundle under `dev-docs/**/active/<slug>/` 2. `node .ai/scripts/projectctl.mjs sync --apply --project <project>` 3. `node .ai/scripts/projectctl.mjs lint --check --project <project>` |
+| REUSE_TASK | 1. Read `dev-docs/**/active/<slug>/00-overview.md` 2. (if needed) Update `State:` + `node .ai/scripts/projectctl.mjs sync --apply --project <project>` |
+| PROJECT_UPDATE | 1. Edit `.ai/project/<project>/registry.yaml` 2. `node .ai/scripts/projectctl.mjs sync --apply --project <project>` |
 
 ## Verification
 - If you updated project hub files:
-  - `node .ai/scripts/projectctl.mjs lint --check --project main`
+  - `node .ai/scripts/projectctl.mjs lint --check --project <project>`
 - If you changed SSOT skills:
   - `node .ai/scripts/lint-skills.mjs --strict`
   - `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
 
 ## Boundaries
-- Do not implement product code changes in this workflow.
+- Do not implement product code changes in the workflow.
 - Do not create task bundles under `dev-docs/**` (delegate to task-level workflows).
 - Do not edit generated stubs under `.codex/` or `.claude/` directly.
 

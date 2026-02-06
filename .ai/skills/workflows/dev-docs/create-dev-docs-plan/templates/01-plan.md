@@ -1,7 +1,7 @@
 # 01 Plan
 
-## Milestones
-1. <!-- milestone -->
+## Phases
+1. <!-- phase name and deliverable -->
 
 ## Detailed steps
 - <!-- ordered list -->

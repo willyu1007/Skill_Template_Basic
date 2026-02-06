@@ -1,12 +1,12 @@
 # Project Contract (Repo-level)
 
-This document is the **single source of truth** for the project governance system in this repository.
-All project-governance skills and scripts MUST follow this contract.
+The Project Contract is the **single source of truth** for the repository's project governance system.
+All project-governance skills and scripts MUST follow the Project Contract.
 
 ## 0. Scope
-- This repository uses a project hub under `.ai/project/<project>/` (default project: `main`).
+- The repository uses a project hub under `.ai/project/<project>/` (default project: `main`).
 - Task execution documentation remains under one or more `dev-docs` roots (module-friendly).
-- This contract governs:
+- The Project Contract governs:
   - IDs and status enums
   - Scanning rules (multi-root)
   - Validation/lint policy
@@ -33,7 +33,7 @@ Governed here:
 - `task_id` (stable primary key, `T-xxx`)
 - `project` (default: `main`)
 
-The task meta file MAY include a `status` field for display, but it is **not** authoritative for task progress.
+The task meta file MAY include a `status` field for display, but the field is **not** authoritative for task progress.
 
 ### 1.3 Project semantic graph (SoT)
 **Authoritative file:** `.ai/project/<project>/registry.yaml`
@@ -126,9 +126,9 @@ keywords:
 - `version` must be `1`
 - `task_id` must match `^T-\\d{3}$`
 - `project` must match the project slug (default: `main`)
-- If `slug` is present, it MUST equal the task directory name
-- If `status` is present, it must match the allowed task status enum
-- If `updated` is present, it must match `YYYY-MM-DD`
+- If `slug` is present, the value MUST equal the task directory name
+- If `status` is present, the value MUST match the allowed task status enum
+- If `updated` is present, the value MUST match `YYYY-MM-DD`
 
 ## 5. Project registry file: `registry.yaml`
 
@@ -181,13 +181,20 @@ If `task_doc_roots` is missing or empty:
 ### 7.1 Migration policy
 During migration:
 - Missing `.ai-task.yaml` is a **warning** (non-blocking).
-- If `.ai-task.yaml` exists, it is strictly validated.
+- If `.ai-task.yaml` exists, validate the file strictly.
 
 ### 7.2 Drift and human verification warnings
 - If `.ai-task.yaml.status` is "ahead" of the task bundle status, lint SHOULD warn.
 - If task status is `done` and `00-overview.md` has unchecked Acceptance criteria checkboxes, lint SHOULD warn.
 
 ## 8. Change control
-- This contract is **read-only by default**.
-- Update this file only when explicitly requested and approved, and record the change in the project changelog.
+- The Project Contract is **read-only by default**.
+- Update `CONTRACT.md` only when explicitly requested and approved, and record the change in the project changelog.
 
+## 9. Skill selection (description-only)
+
+This contract defines **data sources of truth** and invariants.
+The contract intentionally does not define LLM routing rules.
+
+Skill selection is governed by each skill’s frontmatter `description` (and the skill body for execution guidance).
+When selection drifts, refine the relevant skill description instead of adding navigation logic to this contract.

@@ -39,7 +39,7 @@ If no task bundle exists yet, use `create-dev-docs-plan` first.
    - any scope changes
    - the next concrete step
 2. Update `01-plan.md`:
-   - mark completed milestones
+   - mark completed phases
    - re-sequence remaining tasks if needed
 3. Update `02-architecture.md`:
    - record new interfaces and decisions
@@ -60,7 +60,7 @@ If no task bundle exists yet, use `create-dev-docs-plan` first.
 
 ## Verification
 - [ ] Task status is clearly documented (`planned | in-progress | blocked | done`)
-- [ ] Completed milestones are marked in the plan
+- [ ] Completed phases are marked in the plan
 - [ ] Implementation notes capture what changed and why
 - [ ] Verification section records commands run and outcomes
 - [ ] `05-pitfalls.md` is updated for any important failures and the summary is current

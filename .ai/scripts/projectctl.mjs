@@ -94,11 +94,23 @@ Commands:
     --json                    Output a single JSON array instead of JSON lines
     Locate tasks quickly for dedupe/triage (LLM-friendly output).
 
+  map
+    --repo-root <path>        Repo root (default: auto-detect; fallback: cwd)
+    --project <slug>          Project slug (default: ${DEFAULT_PROJECT})
+    --task <T-###>            Task ID to map (required)
+    --feature <F-###>         Feature ID to map the task to
+    --milestone <M-###>       Milestone ID to map the task to
+    --requirement <R-###>     Requirement ID to map the task to (creates if needed)
+    --dry-run                 Show what would change without writing
+    --apply                   Apply the mapping change
+    Map a task to Feature/Milestone/Requirement in the registry.
+
 Examples:
   node .ai/scripts/projectctl.mjs init --project main
   node .ai/scripts/projectctl.mjs lint --check --project main
   node .ai/scripts/projectctl.mjs sync --dry-run --project main
   node .ai/scripts/projectctl.mjs sync --apply --project main
+  node .ai/scripts/projectctl.mjs map --task T-001 --feature F-002 --apply
 `.trim();
 
   console.log(msg);
@@ -900,7 +912,9 @@ function cmdLint({ repoRoot, projectSlug, strict }) {
   }
 
   if (!registry) {
-    warnings.push(`Project hub is not initialized for project "${projectSlug}". Run: projectctl init --project ${projectSlug}`);
+    warnings.push(
+      `Project hub is not initialized for project "${projectSlug}". Run: node .ai/scripts/projectctl.mjs init --project ${projectSlug}`
+    );
     devDocsRoots = discoverDevDocsRoots(repoRoot);
   } else {
     const configured = getConfiguredRootsFromRegistry(registry);
@@ -1081,11 +1095,6 @@ function cmdQuery({ repoRoot, projectSlug, id, status, text, json }) {
     console.error(colors.yellow(`[warning] Failed to parse registry.yaml; falling back to dev-docs scan: ${loaded.error}`));
   }
 
-  function normalizeStatus(s) {
-    const t = String(s || '').trim();
-    return t;
-  }
-
   function includesText(value, needle) {
     if (!needle) return true;
     const n = String(needle).toLowerCase();
@@ -1095,7 +1104,7 @@ function cmdQuery({ repoRoot, projectSlug, id, status, text, json }) {
 
   function taskMatches(t) {
     if (id && String(t.id || '') !== id) return false;
-    if (status && normalizeStatus(t.status) !== status) return false;
+    if (status && String(t.status || '').trim() !== status) return false;
     if (text) {
       const blobParts = [];
       for (const k of ['id', 'slug', 'title', 'description', 'status', 'dev_docs_path', 'feature_id', 'milestone_id']) {
@@ -1247,7 +1256,9 @@ function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing, changelo
     reg = loaded.registry;
   } else {
     if (!initIfMissing) {
-      errors.push(`Project hub missing for "${projectSlug}". Run: projectctl init --project ${projectSlug}`);
+      errors.push(
+        `Project hub missing for "${projectSlug}". Run: node .ai/scripts/projectctl.mjs init --project ${projectSlug}`
+      );
       return { ok: false, errors, warnings, actions };
     }
 
@@ -1320,12 +1331,23 @@ function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing, changelo
     if (TASK_ID_RE.test(meta.task_id)) existingIds.add(meta.task_id);
   }
 
+  // Also include any IDs already present in the registry to avoid reusing historical IDs.
+  if (Array.isArray(reg.tasks)) {
+    for (const t of reg.tasks) {
+      if (!t || typeof t !== 'object') continue;
+      const id = String(t.id || '').trim();
+      if (TASK_ID_RE.test(id)) existingIds.add(id);
+    }
+  }
+
   function nextId() {
+    // Allocate monotonically increasing IDs (best-effort) to avoid reusing historical task IDs.
     let max = 0;
     for (const id of existingIds) {
-      const n = Number(id.slice(2));
+      const n = Number(String(id).slice(2));
       if (Number.isFinite(n) && n > max) max = n;
     }
+
     let candidate = max + 1;
     while (candidate <= 999) {
       const id = `T-${String(candidate).padStart(3, '0')}`;
@@ -1492,7 +1514,7 @@ function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing, changelo
       warnings.push(String(res.error || 'Failed to append changelog.'));
     } else if (entries.length > 0) {
       actions.push({
-        op: dryRun || !apply ? 'append' : 'append',
+        op: 'append',
         path: changelogPath,
         note: `changelog (${entries.length} entries)`,
         mode: dryRun || !apply ? 'dry-run' : undefined,
@@ -1639,6 +1661,122 @@ function cmdSync({ repoRoot, projectSlug, dryRun, apply, initIfMissing, changelo
   return { ok: okExit, errors, warnings, actions };
 }
 
+function cmdMap({ repoRoot, projectSlug, taskId, featureId, milestoneId, requirementId, dryRun, apply }) {
+  const errors = [];
+  const actions = [];
+
+  if (!taskId || !TASK_ID_RE.test(taskId)) {
+    errors.push(`Invalid or missing --task (expected T-###, got "${taskId || ''}").`);
+    return { ok: false, errors, actions };
+  }
+
+  if (!featureId && !milestoneId && !requirementId) {
+    errors.push('At least one of --feature, --milestone, or --requirement is required.');
+    return { ok: false, errors, actions };
+  }
+
+  const loaded = loadRegistry(repoRoot, projectSlug);
+  if (!loaded.registry) {
+    errors.push(`Failed to load registry: ${loaded.error || 'registry not found'}`);
+    return { ok: false, errors, actions };
+  }
+
+  const reg = loaded.registry;
+  const registryPath = loaded.path;
+
+  // Find the task in registry
+  if (!Array.isArray(reg.tasks)) reg.tasks = [];
+  const taskEntry = reg.tasks.find((t) => t && t.id === taskId);
+  if (!taskEntry) {
+    errors.push(`Task "${taskId}" not found in registry. Run sync first.`);
+    return { ok: false, errors, actions };
+  }
+
+  // Validate feature exists
+  if (featureId) {
+    const featureExists = Array.isArray(reg.features) && reg.features.some((f) => f && f.id === featureId);
+    if (!featureExists) {
+      errors.push(`Feature "${featureId}" not found in registry.`);
+      return { ok: false, errors, actions };
+    }
+  }
+
+  // Validate milestone exists
+  if (milestoneId) {
+    const milestoneExists = Array.isArray(reg.milestones) && reg.milestones.some((m) => m && m.id === milestoneId);
+    if (!milestoneExists) {
+      errors.push(`Milestone "${milestoneId}" not found in registry.`);
+      return { ok: false, errors, actions };
+    }
+  }
+
+  // Validate/create requirement
+  if (requirementId) {
+    if (!Array.isArray(reg.requirements)) reg.requirements = [];
+    const reqExists = reg.requirements.some((r) => r && r.id === requirementId);
+    if (!reqExists) {
+      // Auto-create the requirement entry
+      reg.requirements.push({
+        id: requirementId,
+        title: `(auto-created for ${taskId})`,
+        feature_id: featureId || taskEntry.feature_id || 'F-000',
+        status: 'planned',
+      });
+      actions.push({ op: 'create', target: 'requirement', id: requirementId, note: 'auto-created' });
+    }
+  }
+
+  // Apply mappings
+  const changes = [];
+  if (featureId && taskEntry.feature_id !== featureId) {
+    changes.push(`feature_id: ${taskEntry.feature_id || '(none)'} -> ${featureId}`);
+    taskEntry.feature_id = featureId;
+  }
+  if (milestoneId && taskEntry.milestone_id !== milestoneId) {
+    changes.push(`milestone_id: ${taskEntry.milestone_id || '(none)'} -> ${milestoneId}`);
+    taskEntry.milestone_id = milestoneId;
+  }
+  if (requirementId) {
+    const reqIds = Array.isArray(taskEntry.requirement_ids) ? taskEntry.requirement_ids : [];
+    if (!reqIds.includes(requirementId)) {
+      reqIds.push(requirementId);
+      taskEntry.requirement_ids = reqIds;
+      changes.push(`requirement_ids: added ${requirementId}`);
+    }
+  }
+
+  if (changes.length === 0) {
+    ok(`[ok] Task ${taskId} already has the specified mapping. No changes needed.`);
+    return { ok: true, errors, actions };
+  }
+
+  taskEntry.updated = today();
+  actions.push({ op: 'update', target: 'task', id: taskId, changes });
+
+  if (dryRun || !apply) {
+    header('Planned changes:');
+    for (const a of actions) {
+      const changesStr = a.changes ? `: ${a.changes.join(', ')}` : '';
+      const noteStr = a.note ? ` (${a.note})` : '';
+      console.log(`  ${a.op} ${a.target} ${a.id}${changesStr}${noteStr}`);
+    }
+    info('(dry-run mode; use --apply to write changes)');
+    return { ok: true, errors, actions };
+  }
+
+  // Write registry
+  const registryOut = dumpYamlDoc(reg);
+  const changed = writeTextIfChanged(registryPath, registryOut);
+  if (changed) {
+    actions.push({ op: 'write', path: registryPath });
+  }
+
+  ok(`[ok] Mapped ${taskId}:`);
+  for (const c of changes) console.log(`  - ${c}`);
+
+  return { ok: true, errors, actions };
+}
+
 function main() {
   const { command, opts } = parseArgs(process.argv);
   const repoRoot =
@@ -1685,6 +1823,33 @@ function main() {
         text: text || null,
         json,
       });
+      process.exit(res.ok ? 0 : 1);
+      break;
+    }
+    case 'map': {
+      const taskId = opts.task ? String(opts.task).trim() : '';
+      const featureId = opts.feature ? String(opts.feature).trim() : '';
+      const milestoneId = opts.milestone ? String(opts.milestone).trim() : '';
+      const requirementId = opts.requirement ? String(opts.requirement).trim() : '';
+      const dryRun = !!opts['dry-run'];
+      const apply = !!opts.apply;
+      if (!dryRun && !apply) {
+        info('No mode specified; defaulting to --dry-run.');
+      }
+      const res = cmdMap({
+        repoRoot,
+        projectSlug,
+        taskId,
+        featureId: featureId || null,
+        milestoneId: milestoneId || null,
+        requirementId: requirementId || null,
+        dryRun: dryRun || !apply,
+        apply: apply && !dryRun,
+      });
+      if (!res.ok) {
+        header('Errors:');
+        for (const e of res.errors) console.log(colors.red(`- ${e}`));
+      }
       process.exit(res.ok ? 0 : 1);
       break;
     }

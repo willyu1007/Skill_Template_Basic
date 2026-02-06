@@ -13,25 +13,10 @@
 - **Generated stubs**: do not edit `.codex/skills/` or `.claude/skills/` directly. Regenerate via sync.
 - **Progressive disclosure**: do not recursively enumerate `.ai/` to "discover" content.
 
-## Routing
+## Skill selection (description-only)
 
-- If the task is **project governance / project-level progress** (milestones/features/requirements/tasks mapping, dedupe/triage, project hub sync/lint):
-  - Open: `.ai/project/AGENTS.md`
-  - Use skills: `project-orchestrator`, `project-sync-lint`
-- If the task is **LLM engineering** (provider integration, calling wrappers, profiles, prompts, cost/telemetry, credentials/config keys):
-  - Open: `.ai/llm-config/AGENTS.md`
-  - Invoke workflow skill: `llm-engineering`
-- If the task is **skill authoring/maintenance**:
-  - Open: `.ai/skills/standards/documentation-guidelines/SKILL.md`
-  - Run:
-    - `node .ai/scripts/lint-skills.mjs --strict`
-    - `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
-- If the user asks to **sync skill stubs** (sync skills / sync stubs):
-  - Use the repo selection in `.ai/skills/_meta/sync-manifest.json` via `--scope current`
-  - Run: `node .ai/scripts/sync-skills.mjs --scope current --providers both --mode reset --yes`
-- If the task is **dev-docs task documentation** (long-running work, handoff, context recovery):
-  - Open: `dev-docs/AGENTS.md`
-  - Use workflows: `create-dev-docs-plan`, `update-dev-docs-for-handoff`
+Select skills by semantic match to each skill’s frontmatter `description`.
+Do not maintain routing tables in this file. When selection drifts, update the relevant skill description instead.
 
 ## Context loading rules (token-efficient)
 

@@ -2,15 +2,15 @@
 
 <!--
 LLM:
-- This is the single intake surface for progressive information capture.
+- Single intake surface for progressive information capture.
 - Only edit inside the BEGIN/END LLM blocks.
 
 Rules:
 - The user does NOT need to answer every question at once.
 - Do not show explicit "mapping tables" to SSOT files here; just capture and organize inputs.
 - When a stage starts, roll once:
-  - Archive previous stage's "Current focus" + "This round" into the Archive (<details>) section.
-  - Clear "Current focus" + "This round" for the new stage.
+  - Archive previous stage's "Current focus" + "Round inputs" into the Archive (<details>) section.
+  - Clear "Current focus" + "Round inputs" for the new stage.
 -->
 
 language: {{language}}
@@ -51,7 +51,7 @@ stage: {{stage}}
 
 ## 3. Notes (LLM)
 <!-- BEGIN LLM:PRE_STAGE_A_NOTES -->
-### This round (new inputs)
+### Round inputs (new inputs)
 - (append as the user shares info)
 
 ### Archive (folded, append-only)
@@ -65,4 +65,3 @@ stage: {{stage}}
 
 ## 4. Next (Read-only)
 - See `init/INIT-BOARD.md`
-
