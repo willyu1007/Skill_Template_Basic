@@ -5,7 +5,7 @@
  * Supports flat key-value pairs with optional quoted values.
  *
  * Usage:
- *   import { parseFrontmatter, extractFrontmatterBlock, extractField } from './lib/frontmatter.mjs';
+ *   import { parseFrontmatter, extractFrontmatterBlock } from './lib/frontmatter.mjs';
  *
  *   const { front, body } = parseFrontmatter(content);
  *   console.log(front.name, front.description);
@@ -71,55 +71,3 @@ export function extractFrontmatterBlock(content) {
   return { full, yaml, rest };
 }
 
-/**
- * Extract a specific field from frontmatter or raw YAML content.
- *
- * @param {string} frontmatter - Frontmatter block or full content
- * @param {string} fieldName - Field to extract (e.g., 'name', 'description')
- * @param {string} fallback - Fallback value if field not found
- * @returns {string}
- */
-export function extractField(frontmatter, fieldName, fallback = '') {
-  if (!frontmatter) return fallback;
-
-  const re = new RegExp(`^${fieldName}:\\s*(.+)$`, 'm');
-  const match = frontmatter.match(re);
-  if (!match) return fallback;
-
-  let value = match[1].trim();
-
-  // Remove surrounding quotes
-  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-    value = value.slice(1, -1);
-  }
-
-  return value;
-}
-
-/**
- * Generate a frontmatter block from key-value pairs.
- *
- * @param {Record<string, string>} fields - Fields to include
- * @returns {string} - Frontmatter block with --- delimiters
- */
-export function generateFrontmatter(fields) {
-  const lines = ['---'];
-  for (const [key, value] of Object.entries(fields)) {
-    // Quote values that contain special characters
-    const needsQuote = /[:#\[\]{}|>&*!]/.test(value) || value.includes('\n');
-    const formatted = needsQuote ? `"${value.replace(/"/g, '\\"')}"` : value;
-    lines.push(`${key}: ${formatted}`);
-  }
-  lines.push('---', '');
-  return lines.join('\n');
-}
-
-/**
- * Check if content has valid frontmatter.
- *
- * @param {string} content - Markdown content
- * @returns {boolean}
- */
-export function hasFrontmatter(content) {
-  return content && content.startsWith('---') && content.indexOf('\n---', 3) !== -1;
-}

@@ -60,9 +60,10 @@ These MAY contain manual notes, but any section marked as AUTO-GENERATED is **no
 - Milestone: `M-xxx`
 - Feature: `F-xxx`
 - Requirement: `R-xxx`
-- Task: `T-xxx`
+- Task: `T-xxx` (3-digit, range `T-000`..`T-999`, max 1000 tasks per project)
 
 IDs are stable and MUST NOT be reused.
+If the 3-digit range is exhausted, extend the regex to `^T-\d{3,}$` in both `CONTRACT.md` and `ctl-project-governance.mjs`.
 
 ### 2.2 Reserved system IDs
 - `M-000`: Inbox / Triage milestone

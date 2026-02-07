@@ -18,7 +18,7 @@ node .ai/scripts/ctl-project-governance.mjs query --project <project> --json
 | T-001 | <slug> | <status> | F-xxx | dev-docs/active/<slug>/ |
 
 **Quick actions**:
-- View details: `cat dev-docs/active/<slug>/00-overview.md`
+- View details: read `dev-docs/active/<slug>/00-overview.md`
 - Filter by status: `node .ai/scripts/ctl-project-governance.mjs query --status in-progress`
 ```
 

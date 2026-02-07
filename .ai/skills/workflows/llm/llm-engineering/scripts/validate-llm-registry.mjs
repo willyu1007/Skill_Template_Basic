@@ -22,8 +22,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Note: This script uses inline YAML parsing utilities for portability.
-// The shared library at .ai/scripts/lib/yaml-lite.mjs contains equivalent functions.
+import {
+  stripInlineComment,
+  unquote,
+  parseTopLevelVersion,
+  parseListFieldValues,
+  parseAllScalarValues,
+  hasTemplateHeader,
+} from '../../../../../scripts/lib/yaml-lite.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,20 +59,6 @@ function readFileSafe(p) {
   }
 }
 
-function stripInlineComment(line) {
-  const idx = line.indexOf('#');
-  if (idx === -1) return line;
-  return line.slice(0, idx);
-}
-
-function unquote(s) {
-  const t = String(s).trim();
-  if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
-    return t.slice(1, -1);
-  }
-  return t;
-}
-
 function uniqueList(list) {
   return Array.from(new Set(list));
 }
@@ -80,57 +72,6 @@ function findRepoRoot(startDir) {
     if (parent === dir) return null;
     dir = parent;
   }
-}
-
-function hasTemplateHeader(raw) {
-  // Template marker is intentionally simple and cheap.
-  // Real repos should remove "(template)" in the first-line comment headers.
-  const head = raw.split(/\r?\n/).slice(0, 5).join('\n');
-  return head.toLowerCase().includes('(template)');
-}
-
-function parseTopLevelVersion(raw) {
-  // Minimal parsing for `version: <int>` at top level.
-  const m = raw.match(/^\s*version\s*:\s*([0-9]+)\s*$/m);
-  return m ? Number(m[1]) : null;
-}
-
-function parseListFieldValues(raw, listItemKey) {
-  // Extract values from list items that look like:
-  //   - <listItemKey>: value
-  // We do NOT attempt full YAML; this is tuned to the template registry format.
-  const values = [];
-  const lines = raw.replace(/\r\n/g, '\n').split('\n');
-  const re = new RegExp(`^\\s*\\-\\s*${listItemKey}\\s*:\\s*(.+)\\s*$`);
-
-  for (const originalLine of lines) {
-    const line = stripInlineComment(originalLine).trimEnd();
-    const m = line.match(re);
-    if (!m) continue;
-    const v = unquote(m[1]);
-    if (v) values.push(v);
-  }
-
-  return values;
-}
-
-function parseAllScalarValues(raw, keyName) {
-  // Extract scalar assignments that look like:
-  //   keyName: value
-  // across the entire document (used for referenced provider_id in profiles).
-  const values = [];
-  const lines = raw.replace(/\r\n/g, '\n').split('\n');
-  const re = new RegExp(`^\\s*${keyName}\\s*:\\s*(.+)\\s*$`);
-
-  for (const originalLine of lines) {
-    const line = stripInlineComment(originalLine).trimEnd();
-    const m = line.match(re);
-    if (!m) continue;
-    const v = unquote(m[1]);
-    if (v) values.push(v);
-  }
-
-  return values;
 }
 
 function parsePromptTemplates(raw) {

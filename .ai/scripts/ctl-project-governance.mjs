@@ -18,7 +18,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { colors, die, header, info, ok } from './lib/colors.mjs';
-import { parseSimpleList, parseSimpleMap, parseTopLevelVersion } from './lib/yaml-lite.mjs';
+import { parseSimpleList, parseSimpleMap, parseTopLevelVersion, stripInlineComment as yamlStripInlineComment } from './lib/yaml-lite.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -255,21 +255,8 @@ function normalizeEol(s) {
   return String(s || '').replace(/\r\n/g, '\n');
 }
 
-function stripInlineComment(line) {
-  // Minimal: treat '#' as comment delimiter only when not inside quotes.
-  const s = String(line || '');
-  let inSingle = false;
-  let inDouble = false;
-  for (let i = 0; i < s.length; i++) {
-    const ch = s[i];
-    if (ch === "'" && !inDouble) inSingle = !inSingle;
-    else if (ch === '"' && !inSingle) inDouble = !inDouble;
-    else if (ch === '#' && !inSingle && !inDouble) {
-      return s.slice(0, i);
-    }
-  }
-  return s;
-}
+// Re-export from yaml-lite (quote-aware).
+const stripInlineComment = yamlStripInlineComment;
 
 function countIndent(line) {
   const m = String(line).match(/^( *)/);
@@ -416,7 +403,8 @@ function parseYamlDoc(raw) {
       const after = t.replace(/^\-\s*/, '');
       if (!after.trim()) {
         const child = parseBlock(i + 1, indent + 2);
-        out.push(child.value);
+        // Skip null values from empty/malformed list items instead of silently inserting them.
+        if (child.value != null) out.push(child.value);
         i = child.next;
         continue;
       }
@@ -428,7 +416,7 @@ function parseYamlDoc(raw) {
         const rest = (m[2] ?? '').trim();
         if (rest === '') {
           const child = parseBlock(i + 1, indent + 4);
-          obj[key] = child.value;
+          obj[key] = child.value != null ? child.value : {};
           i = child.next;
         } else {
           obj[key] = parseScalar(rest);

@@ -19,7 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { colors } from './lib/colors.mjs';
-import { extractFrontmatterBlock } from './lib/frontmatter.mjs';
+import { extractFrontmatterBlock, parseFrontmatter as parseFrontmatterRaw } from './lib/frontmatter.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,24 +114,13 @@ function findSkillDirs(rootDir) {
   return skillDirs.sort((a, b) => a.localeCompare(b));
 }
 
+// Wraps the library parseFrontmatter (returns { front, body }) into the
+// flat { name, description } shape expected by lintSkill().
 function parseFrontmatter(content) {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) return null;
-
-  const yaml = match[1];
-  const result = {};
-
-  // Simple YAML parsing for name and description
-  const nameMatch = yaml.match(/^name:\s*(.+)$/m);
-  const descMatch = yaml.match(/^description:\s*(.+)$/m);
-
-  if (nameMatch) result.name = nameMatch[1].trim();
-  if (descMatch) result.description = descMatch[1].trim();
-
-  return result;
+  const result = parseFrontmatterRaw(content);
+  if (!result || result.error) return null;
+  return result.front || null;
 }
-
-// extractFrontmatterBlock is imported from ./lib/frontmatter.mjs
 
 function findFirstHeadingText(markdown) {
   const lines = String(markdown || '').split(/\r?\n/);
@@ -159,7 +148,12 @@ function fixSkillFile(skillDir, skillsRoot) {
     return { relPath, changed: false, actions: ['Missing SKILL.md (cannot fix)'] };
   }
 
-  const original = fs.readFileSync(skillMdPath, 'utf8');
+  let original;
+  try {
+    original = fs.readFileSync(skillMdPath, 'utf8');
+  } catch (err) {
+    return { relPath, changed: false, actions: [`Cannot read SKILL.md: ${err.message}`] };
+  }
   let content = original.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const actions = [];
   let changed = false;
@@ -260,7 +254,13 @@ function lintSkill(skillDir, skillsRoot) {
     return { relPath, errors, warnings };
   }
 
-  const content = fs.readFileSync(skillMdPath, 'utf8');
+  let content;
+  try {
+    content = fs.readFileSync(skillMdPath, 'utf8');
+  } catch (err) {
+    errors.push(`Cannot read SKILL.md: ${err.message}`);
+    return { relPath, errors, warnings };
+  }
   const lines = content.split('\n');
 
   // Check line count

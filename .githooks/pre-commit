@@ -1,11 +1,9 @@
 #!/bin/sh
 #
-# Git pre-commit hook for project governance sync.
+# Git pre-commit hook.
 #
-# This hook automatically runs `ctl-project-governance sync` when dev-docs files are staged,
-# keeping the project hub (registry, dashboard, task-index) in sync.
-#
-# Supports multiple projects: syncs all initialized projects under .ai/project/
+# 1. Lint staged Markdown files (encoding, EOL, format).
+# 2. Auto-sync project governance hub when dev-docs files are staged.
 #
 # Install: node .githooks/install.mjs
 # Uninstall: node .githooks/install.mjs --uninstall
@@ -13,7 +11,20 @@
 
 set -e
 
-# Check if any dev-docs files are staged (supports multi-root dev-docs)
+# ── 1. Markdown lint (staged .md files) ──────────────────────────────
+STAGED_MD=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$' || true)
+
+if [ -n "$STAGED_MD" ]; then
+  echo "[hook] Linting staged Markdown files..."
+  # --quiet: only report errors (warnings do not block commit)
+  # --no-links: skip link checks (incomplete worktree may cause false positives)
+  node .ai/scripts/lint-docs.mjs --quiet --no-links --path . 2>&1 || {
+    echo "[hook] Markdown lint failed. Fix errors before committing."
+    exit 1
+  }
+fi
+
+# ── 2. Project governance sync (dev-docs changes) ────────────────────
 if git diff --cached --name-only | grep -qE '(^|/)dev-docs/'; then
   echo "[hook] Detected dev-docs changes, running ctl-project-governance sync..."
   
