@@ -117,6 +117,14 @@ function writeFileIfMissing(filePath, content) {
   return { op: 'write', path: filePath };
 }
 
+function fileContains(filePath, token) {
+  try {
+    return fs.readFileSync(filePath, 'utf8').includes(token);
+  } catch (e) {
+    return false;
+  }
+}
+
 // ============================================================================
 // CI Management
 // ============================================================================
@@ -284,6 +292,7 @@ function cmdVerify(repoRoot) {
   const config = loadConfig(repoRoot);
   const errors = [];
   const warnings = [];
+  const ciVerifyEntry = 'ci-verify.mjs';
 
   if (!config.provider) {
     warnings.push('No CI provider configured. Run: node .ai/scripts/ctl-ci.mjs init --provider <github|gitlab>');
@@ -305,12 +314,23 @@ function cmdVerify(repoRoot) {
       const workflows = fs.readdirSync(workflowDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
       if (workflows.length === 0) {
         warnings.push('No workflow files found in .github/workflows/');
+      } else {
+        const hasCiVerifyEntry = workflows.some((fileName) => fileContains(path.join(workflowDir, fileName), ciVerifyEntry));
+        if (!hasCiVerifyEntry) {
+          warnings.push(
+            `No GitHub workflow calls ${ciVerifyEntry}. Add an explicit step such as: node .ai/scripts/ci-verify.mjs`
+          );
+        }
       }
     }
   } else if (config.provider === 'gitlab') {
     const gitlabCi = path.join(repoRoot, '.gitlab-ci.yml');
     if (!fs.existsSync(gitlabCi)) {
       warnings.push('.gitlab-ci.yml not found. Run: node .ai/scripts/ctl-ci.mjs init --provider gitlab');
+    } else if (!fileContains(gitlabCi, ciVerifyEntry)) {
+      warnings.push(
+        `GitLab pipeline does not call ${ciVerifyEntry}. Add an explicit step such as: node .ai/scripts/ci-verify.mjs`
+      );
     }
   }
 
