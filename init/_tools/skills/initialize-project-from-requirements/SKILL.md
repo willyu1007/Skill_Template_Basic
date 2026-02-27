@@ -97,6 +97,26 @@ Optional inputs:
 - Before requesting user approval, complete the relevant checklist in `templates/quality-checklist.md`
 - If any checklist item is "No", iterate before proceeding
 
+### Rule 4: Post-init LLM Doc Path Hygiene (required before cleanup-init)
+
+- This gate is mandatory when the user chooses to remove the `init/` kit.
+- Perform all steps before running `cleanup-init`:
+  1. Scan active docs for init routes/paths (at minimum: `AGENTS.md`, `README.md`, and any active entry docs).
+  2. Remove init-only routing/explanations from active docs (for example: `init/`, `init/AGENTS.md`, `init/README.md`, `init/_tools/...` as current workflow entry).
+  3. Replace init workflow entry guidance with permanent project entry guidance (typically the root `AGENTS.md` and project root docs).
+  4. Keep archived init history under `docs/project/overview/**` unchanged.
+  5. Verify active docs no longer route to init with:
+
+```bash
+rg -n "init/" AGENTS.md README.md .ai/AGENTS.md dev-docs/AGENTS.md
+```
+
+- Only after this gate passes, run:
+
+```bash
+node init/_tools/init.mjs cleanup-init --repo-root . --apply --i-understand --archive
+```
+
 ---
 
 ## Steps
@@ -225,16 +245,18 @@ node init/_tools/init.mjs review-skill-retention --repo-root .
 node init/_tools/init.mjs update-root-docs --apply
 ```
 
-8. **Approve Stage C**: After handling user's choice (regen docs if selected), run:
-
-```bash
-node init/_tools/init.mjs approve --stage C
-```
+8. If user chose "cleanup init", run the **Post-init LLM Doc Path Hygiene** gate (Rule 4) before cleanup. Do NOT use one-shot `apply --cleanup-init`.
 
 9. (Optional) Remove the bootstrap kit if user chose "cleanup init" or explicitly requests later:
 
 ```bash
 node init/_tools/init.mjs cleanup-init   --repo-root .   --apply   --i-understand --archive
+```
+
+10. **Approve Stage C**: After handling user's selected action(s) (`regen docs` and/or `cleanup init`), run:
+
+```bash
+node init/_tools/init.mjs approve --stage C
 ```
 
 ## Boundaries
@@ -245,6 +267,8 @@ node init/_tools/init.mjs cleanup-init   --repo-root .   --apply   --i-understan
 - Scaffolding MUST NOT overwrite existing files; scaffolding should only create missing directories and small placeholder `README.md` files.
 - **Exception**: The root `README.md` will be replaced with a project-specific version generated from the blueprint. The replacement is intentional - the template README should be replaced with project documentation.
 - The root `AGENTS.md` will be updated from the blueprint (project type, tech stack, key directories) during Stage C apply.
+- Do NOT use `node init/_tools/init.mjs apply --cleanup-init ...` for finalization. Always run cleanup as a separate step after Rule 4 (`Post-init LLM Doc Path Hygiene`) passes.
+- During init-route cleanup, preserve archived history under `docs/project/overview/**`; only active docs should have init routing removed.
 
 ---
 
